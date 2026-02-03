@@ -84,6 +84,7 @@ export default function BookingsPage() {
       confirmed: 'blue',
       checked_in: 'green',
       checked_out: 'default',
+      completed: 'gray',
       cancelled: 'red',
     };
     return colorMap[status];
@@ -95,6 +96,7 @@ export default function BookingsPage() {
       confirmed: '已确认',
       checked_in: '已入住',
       checked_out: '已退房',
+      completed: '已完成',
       cancelled: '已取消',
     };
     return textMap[status];
@@ -102,10 +104,15 @@ export default function BookingsPage() {
 
   const filteredBookings = bookings.filter(booking => {
     const matchStatus = statusFilter === 'all' || booking.status === statusFilter;
+    const searchLower = searchText.toLowerCase();
+    const userName = booking.user?.name || booking.guestInfo?.name || '';
+    const userPhone = booking.user?.phone || booking.guestInfo?.phone || '';
+    const hotelName = booking.hotel?.nameZh || '';
+
     const matchSearch =
-      booking.customer_name.includes(searchText) ||
-      booking.customer_phone.includes(searchText) ||
-      booking.hotel_name?.includes(searchText) ||
+      userName.toLowerCase().includes(searchLower) ||
+      userPhone.includes(searchText) ||
+      hotelName.toLowerCase().includes(searchLower) ||
       false;
     return matchStatus && matchSearch;
   });
@@ -119,46 +126,46 @@ export default function BookingsPage() {
     },
     {
       title: '酒店名称',
-      dataIndex: 'hotel_name',
-      key: 'hotel_name',
+      key: 'hotelName',
+      render: (_, record) => record.hotel?.nameZh,
     },
     {
       title: '房型',
-      dataIndex: 'room_type',
-      key: 'room_type',
+      key: 'roomType',
+      render: (_, record) => record.roomType?.name,
     },
     {
       title: '客户姓名',
-      dataIndex: 'customer_name',
-      key: 'customer_name',
+      key: 'customerName',
+      render: (_, record) => record.user?.name || record.guestInfo?.name || '-',
     },
     {
       title: '联系电话',
-      dataIndex: 'customer_phone',
-      key: 'customer_phone',
+      key: 'customerPhone',
+      render: (_, record) => record.user?.phone || record.guestInfo?.phone || '-',
     },
     {
       title: '入住日期',
-      dataIndex: 'check_in_date',
-      key: 'check_in_date',
+      dataIndex: 'checkInDate',
+      key: 'checkInDate',
       render: (date: string) => dayjs(date).format('YYYY-MM-DD'),
     },
     {
       title: '退房日期',
-      dataIndex: 'check_out_date',
-      key: 'check_out_date',
+      dataIndex: 'checkOutDate',
+      key: 'checkOutDate',
       render: (date: string) => dayjs(date).format('YYYY-MM-DD'),
     },
     {
-      title: '房间数',
-      dataIndex: 'room_count',
-      key: 'room_count',
+      title: '入住人数',
+      dataIndex: 'guestCount',
+      key: 'guestCount',
       width: 80,
     },
     {
       title: '总价',
-      dataIndex: 'total_price',
-      key: 'total_price',
+      dataIndex: 'totalPrice',
+      key: 'totalPrice',
       render: (price: number) => `¥${price}`,
     },
     {
@@ -293,7 +300,7 @@ export default function BookingsPage() {
       <Drawer
         title="预订详情"
         placement="right"
-        width={600}
+        size={600}
         onClose={() => setDrawerVisible(false)}
         open={drawerVisible}
         extra={
@@ -308,27 +315,27 @@ export default function BookingsPage() {
           <>
             <Descriptions column={1} bordered>
               <Descriptions.Item label="订单号">{selectedBooking.id}</Descriptions.Item>
-              <Descriptions.Item label="酒店名称">{selectedBooking.hotel_name}</Descriptions.Item>
-              <Descriptions.Item label="房型">{selectedBooking.room_type}</Descriptions.Item>
-              <Descriptions.Item label="客户姓名">{selectedBooking.customer_name}</Descriptions.Item>
-              <Descriptions.Item label="联系电话">{selectedBooking.customer_phone}</Descriptions.Item>
-              <Descriptions.Item label="电子邮箱">{selectedBooking.customer_email || '-'}</Descriptions.Item>
+              <Descriptions.Item label="酒店名称">{selectedBooking.hotel?.nameZh}</Descriptions.Item>
+              <Descriptions.Item label="房型">{selectedBooking.roomType?.name}</Descriptions.Item>
+              <Descriptions.Item label="客户姓名">{selectedBooking.user?.name || selectedBooking.guestInfo?.name || '-'}</Descriptions.Item>
+              <Descriptions.Item label="联系电话">{selectedBooking.user?.phone || selectedBooking.guestInfo?.phone || '-'}</Descriptions.Item>
+              <Descriptions.Item label="电子邮箱">{selectedBooking.user?.email || selectedBooking.guestInfo?.email || '-'}</Descriptions.Item>
               <Descriptions.Item label="入住日期">
-                {dayjs(selectedBooking.check_in_date).format('YYYY年MM月DD日')}
+                {dayjs(selectedBooking.checkInDate).format('YYYY年MM月DD日')}
               </Descriptions.Item>
               <Descriptions.Item label="退房日期">
-                {dayjs(selectedBooking.check_out_date).format('YYYY年MM月DD日')}
+                {dayjs(selectedBooking.checkOutDate).format('YYYY年MM月DD日')}
               </Descriptions.Item>
               <Descriptions.Item label="住宿天数">
-                {dayjs(selectedBooking.check_out_date).diff(dayjs(selectedBooking.check_in_date), 'day')}天
+                {dayjs(selectedBooking.checkOutDate).diff(dayjs(selectedBooking.checkInDate), 'day')}天
               </Descriptions.Item>
-              <Descriptions.Item label="房间数量">{selectedBooking.room_count}</Descriptions.Item>
-              <Descriptions.Item label="总价">¥{selectedBooking.total_price}</Descriptions.Item>
+              <Descriptions.Item label="入住人数">{selectedBooking.guestCount}</Descriptions.Item>
+              <Descriptions.Item label="总价">¥{selectedBooking.totalPrice}</Descriptions.Item>
               <Descriptions.Item label="特殊要求">
-                {selectedBooking.special_requests || '-'}
+                {selectedBooking.guestInfo?.specialRequests || '-'}
               </Descriptions.Item>
               <Descriptions.Item label="创建时间">
-                {selectedBooking.created_at ? dayjs(selectedBooking.created_at).format('YYYY-MM-DD HH:mm') : '-'}
+                {selectedBooking.createdAt ? dayjs(selectedBooking.createdAt).format('YYYY-MM-DD HH:mm') : '-'}
               </Descriptions.Item>
             </Descriptions>
 

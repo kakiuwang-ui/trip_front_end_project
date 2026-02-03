@@ -64,25 +64,35 @@ export default function DashboardPage() {
       // 计算统计数据
       const today = dayjs();
       const todayBookings = allBookings.filter(b =>
-        dayjs(b.created_at).isSame(today, 'day')
+        dayjs(b.createdAt).isSame(today, 'day')
       ).length;
 
       const monthStart = today.startOf('month');
       const monthRevenue = allBookings
         .filter(b =>
-          dayjs(b.created_at).isAfter(monthStart) &&
+          dayjs(b.createdAt).isAfter(monthStart) &&
           b.status !== 'cancelled'
         )
-        .reduce((sum, b) => sum + b.total_price, 0);
+        .reduce((sum, b) => sum + Number(b.totalPrice), 0);
 
       // 计算总房间数（注意：这里需要从实际的房型数据获取，暂时使用估算值）
-      const totalRooms = hotels.length * 20; // 简化计算，假设每个酒店平均20个房间
+      // 使用 reduce 累加每个酒店下所有房型的 stock
+      // @ts-ignore
+      const totalRooms = hotels.reduce((sum, hotel) => {
+          // @ts-ignore
+          const hotelRooms = hotel.roomTypes?.reduce((rSum, room) => rSum + (room.stock || 0), 0) || 0;
+          return sum + hotelRooms;
+      }, 0);
 
       // 简单估算入住率（已确认+已入住的预订数 / 总房间数）
-      const occupiedRooms = allBookings.filter(b =>
+      // 如果 totalRooms 为 0, 入住率为 0
+      const activeBookingsCount = allBookings.filter(b =>
         b.status === 'confirmed' || b.status === 'checked_in'
       ).length;
-      const occupancyRate = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0;
+      
+      const occupancyRate = totalRooms > 0 
+        ? Math.round((activeBookingsCount / totalRooms) * 100) 
+        : 0;
 
       setStats({
         todayBookings,
@@ -101,9 +111,9 @@ export default function DashboardPage() {
       allBookings
         .filter(b => b.status !== 'cancelled')
         .forEach(b => {
-          const date = dayjs(b.created_at).format('MM-DD');
+          const date = dayjs(b.createdAt).format('MM-DD');
           if (revenueMap.has(date)) {
-            revenueMap.set(date, (revenueMap.get(date) || 0) + b.total_price);
+            revenueMap.set(date, (revenueMap.get(date) || 0) + Number(b.totalPrice));
           }
         });
 
@@ -121,7 +131,7 @@ export default function DashboardPage() {
       }
 
       allBookings.forEach(b => {
-        const date = dayjs(b.created_at).format('MM-DD');
+        const date = dayjs(b.createdAt).format('MM-DD');
         if (bookingMap.has(date)) {
           bookingMap.set(date, (bookingMap.get(date) || 0) + 1);
         }
@@ -138,7 +148,7 @@ export default function DashboardPage() {
       allBookings
         .filter(b => b.status !== 'cancelled')
         .forEach(b => {
-          const roomType = b.room_type || '其他';
+          const roomType = b.roomType?.name || '其他';
           roomTypeMap.set(roomType, (roomTypeMap.get(roomType) || 0) + 1);
         });
 
@@ -150,7 +160,7 @@ export default function DashboardPage() {
 
       // 获取最近3条预订
       const recent = allBookings
-        .sort((a, b) => dayjs(b.created_at).valueOf() - dayjs(a.created_at).valueOf())
+        .sort((a, b) => dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf())
         .slice(0, 3);
       setRecentBookings(recent);
     } catch (error) {
@@ -167,9 +177,10 @@ export default function DashboardPage() {
       confirmed: 'blue',
       checked_in: 'green',
       checked_out: 'default',
+      completed: 'cyan',
       cancelled: 'red',
     };
-    return colorMap[status];
+    return colorMap[status] || 'default';
   };
 
   const getStatusText = (status: BookingStatus): string => {
@@ -178,9 +189,10 @@ export default function DashboardPage() {
       confirmed: '已确认',
       checked_in: '已入住',
       checked_out: '已退房',
+      completed: '已完成',
       cancelled: '已取消',
     };
-    return textMap[status];
+    return textMap[status] || status;
   };
 
   const columns: TableColumnsType<Booking> = [
@@ -192,30 +204,30 @@ export default function DashboardPage() {
     },
     {
       title: '客户姓名',
-      dataIndex: 'customer_name',
-      key: 'customer_name',
+      key: 'customerName', // Changed key to be more unique/descriptive, though strictly not dataIndex
+      render: (_, record) => record.user?.name || record.guestInfo?.name || '未知客户',
     },
     {
       title: '房型',
-      dataIndex: 'room_type',
-      key: 'room_type',
+      key: 'roomType',
+      render: (_, record) => record.roomType?.name || '未知房型',
     },
     {
       title: '入住日期',
-      dataIndex: 'check_in_date',
-      key: 'check_in_date',
+      dataIndex: 'checkInDate',
+      key: 'checkInDate',
       render: (date: string) => dayjs(date).format('MM-DD'),
     },
     {
       title: '退房日期',
-      dataIndex: 'check_out_date',
-      key: 'check_out_date',
+      dataIndex: 'checkOutDate',
+      key: 'checkOutDate',
       render: (date: string) => dayjs(date).format('MM-DD'),
     },
     {
       title: '总价',
-      dataIndex: 'total_price',
-      key: 'total_price',
+      dataIndex: 'totalPrice',
+      key: 'totalPrice',
       render: (price: number) => `¥${price}`,
     },
     {

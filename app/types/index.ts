@@ -128,7 +128,7 @@ export interface HotelListResponse {
 }
 
 // 预订相关类型
-export type BookingStatus = 'pending' | 'completed' | 'cancelled';
+export type BookingStatus = 'pending' | 'confirmed' | 'checked_in' | 'checked_out' | 'completed' | 'cancelled';
 
 export interface Booking {
   id: number;

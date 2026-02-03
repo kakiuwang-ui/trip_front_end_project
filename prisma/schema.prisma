@@ -182,7 +182,7 @@ model Booking {
   checkOutDate DateTime
   guestCount  Int       @default(1)
   totalPrice  Decimal   @db.Decimal(10, 2)
-  // 订单状态: pending(预定中)/completed(已完成)/cancelled(已取消)
+  // 订单状态: 'pending' | 'confirmed' | 'checked_in' | 'checked_out' | 'completed' | 'cancelled'
   status      String    @default("pending")
   guestInfo   Json?
   createdAt   DateTime  @default(now())

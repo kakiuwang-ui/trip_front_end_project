@@ -7,7 +7,7 @@ import type { BadgeProps } from 'antd';
 import dayjs from 'dayjs';
 import { getMyHotels } from '@/app/services/hotel';
 import { getHotelRoomTypes, getRoomAvailability, type RoomType, type RoomAvailability as ApiRoomAvailability } from '@/app/services/room';
-import type { Hotel, Room } from '@/app/types';
+import type { Hotel } from '@/app/types';
 
 const { Option } = Select;
 
@@ -231,7 +231,7 @@ export default function CalendarPage() {
             >
               {hotels.map(hotel => (
                 <Option key={hotel.id} value={hotel.id!}>
-                  {hotel.name}
+                  {hotel.nameZh}
                 </Option>
               ))}
             </Select>
@@ -259,7 +259,7 @@ export default function CalendarPage() {
         </div>
 
         <Calendar
-          dateCellRender={dateCellRender}
+          cellRender={dateCellRender}
           onSelect={onSelect}
         />
       </Card>

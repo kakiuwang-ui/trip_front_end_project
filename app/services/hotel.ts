@@ -28,12 +28,13 @@ export const getHotelById = (id: number) => {
 /**
  * 获取我的酒店列表（商户）
  */
-export const getMyHotels = () => {
+export const getMyHotels = async () => {
   const user = getStoredUser();
   if (!user) {
-    return Promise.reject(new Error('未登录'));
+    throw new Error('未登录');
   }
-  return get<ApiResponse<Hotel[]>>(`/hotels?merchantId=${user.id}`);
+  const response = await get<ApiResponse<Hotel[]>>(`/hotels?merchantId=${user.id}`);
+  return response.data || [];
 };
 
 /**

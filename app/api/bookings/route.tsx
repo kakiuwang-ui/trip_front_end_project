@@ -6,6 +6,31 @@ import { verifyAuth } from '@/app/api/utils/auth';
 /**
  * @swagger
  * /api/bookings:
+ *   get:
+ *     summary: 获取预订列表
+ *     description: 获取预订列表。支持查询当前用户的预订，或商户查询自己名下酒店的预订。
+ *     tags:
+ *       - Bookings
+ *     parameters:
+ *       - in: query
+ *         name: merchantId
+ *         schema:
+ *           type: integer
+ *         description: 商户ID (选填，若提供则返回该商户名下酒店的所有预订)
+ *     responses:
+ *       200:
+ *         description: 成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
  *   post:
  *     summary: 创建预订
  *     description: 用户预订酒店房间
@@ -64,7 +89,83 @@ import { verifyAuth } from '@/app/api/utils/auth';
  *         description: 未登录
  */
 
+export async function GET(request: NextRequest) {
+  try {
+    const authResult = verifyAuth(request);
+    if (!authResult.success) {
+      return NextResponse.json({ success: false, error: authResult.error }, { status: authResult.status });
+    }
+    const currentUserId = authResult.user.userId;
+
+    const { searchParams } = new URL(request.url);
+    const merchantIdParam = searchParams.get('merchantId');
+
+    let where: any = {};
+
+    if (merchantIdParam) {
+      // 商户查询自己酒店的订单
+      // 安全检查：确保当前用户就是查询的商户，或者是管理员
+      const merchantId = parseInt(merchantIdParam);
+      
+      // 这里简单校验：如果请求特定merchantId，当前用户必须是该merchant (或者我们可以允许Admin)
+      // 如果不是同一个用户，暂时拒绝 (防止用户枚举别人的订单)
+      // 但如果当前角色是管理员，可以放行。这里主要服务于 Dashboard (用户查自己的)。
+      if (merchantId !== currentUserId) {
+         // 可选：检查是否管理员。这里简单起见，仅允许查自己。
+         return NextResponse.json({ success: false, error: '无权查看他人商户订单' }, { status: 403 });
+      }
+
+      where = {
+        hotel: {
+          merchantId: merchantId
+        }
+      };
+    } else {
+      // 普通用户查询自己的订单
+      where = {
+        userId: currentUserId
+      };
+    }
+
+    const bookings = await prisma.booking.findMany({
+      where,
+      include: {
+        hotel: {
+          select: {
+            id: true,
+            nameZh: true,
+            images: true
+          }
+        },
+        roomType: {
+          select: {
+            id: true,
+            name: true,
+          }
+        },
+        user: {
+           select: {
+               id: true,
+               name: true,
+               email: true,
+               phone: true
+           }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    return NextResponse.json({ success: true, data: bookings });
+  } catch (error) {
+    console.error('Fetch bookings error:', error);
+    return NextResponse.json({ success: false, error: '获取预订列表失败' }, { status: 500 });
+  }
+}
+
 export async function POST(request: NextRequest) {
+
   try {
     // 1. 验证用户
     const authResult = verifyAuth(request);
