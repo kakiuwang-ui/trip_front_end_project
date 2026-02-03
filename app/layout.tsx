@@ -3,8 +3,8 @@ import "./globals.css";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "易宿酒店管理系统",
-  description: "易宿酒店预订平台",
+  title: "易宿酒店商户版",
+  description: "易宿酒店综合管理平台",
 };
 
 export default function RootLayout({
@@ -13,7 +13,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN" suppressHydrationWarning>
+    <html lang="zh-CN">
       <body className="antialiased">
         <Providers>{children}</Providers>
       </body>

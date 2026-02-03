@@ -3,13 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getStoredUser, isAuthenticated } from '@/app/services/auth';
-import type { User, UserRole } from '@/app/types';
+import type { User, Role } from '@/app/types';
 
 /**
  * 认证 Hook
  * 用于获取当前用户信息和检查认证状态
  */
-export function useAuth(requiredRole?: UserRole) {
+export function useAuth(requiredRole?: Role['name']) {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);

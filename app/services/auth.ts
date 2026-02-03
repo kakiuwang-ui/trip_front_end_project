@@ -4,13 +4,14 @@ import type {
   RegisterData,
   AuthResponse,
   User,
+  ApiResponse,
 } from '@/app/types';
 
 /**
  * 用户注册
  */
 export const register = (data: RegisterData) => {
-  return post<AuthResponse>('/auth/register', data);
+  return post<ApiResponse<User>>('/auth/register', data);
 };
 
 /**
@@ -30,17 +31,18 @@ export const login = async (data: LoginData) => {
   console.log('用户角色:', res.user?.role); // 调试日志
 
   return {
-    token: res.accessToken || res.token,
+    success: res.success ?? true,
+    accessToken: res.accessToken || res.token,
     refreshToken: res.refreshToken,
     user: res.user,
-  } as AuthResponse & { refreshToken?: string };
+  } as AuthResponse;
 };
 
 /**
  * 获取当前用户信息
  */
 export const getCurrentUser = () => {
-  return get<User>('/auth/me');
+  return get<ApiResponse<User>>('/users/profile');
 };
 
 /**

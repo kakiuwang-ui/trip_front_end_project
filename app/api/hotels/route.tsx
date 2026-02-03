@@ -195,6 +195,10 @@ export async function POST(request: NextRequest) {
     const merchantId = Number(body.merchantId);
     const locationId = body.locationId ? Number(body.locationId) : undefined;
     const starRating = body.starRating ? Number(body.starRating) : undefined;
+    
+    // Extract nested data
+    const roomTypes = Array.isArray(body.roomTypes) ? body.roomTypes : [];
+    const tagIds = Array.isArray(body.tagIds) ? body.tagIds : [];
 
     if (
       !body.nameZh ||
@@ -206,8 +210,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: '缺少必要字段' }, { status: 400 });
     }
 
-    const newHotel = await prisma.hotel.create({
-      data: {
+    const createData: any = {
         nameZh: body.nameZh,
         nameEn: body.nameEn,
         address: body.address,
@@ -217,7 +220,34 @@ export async function POST(request: NextRequest) {
         merchantId,
         locationId: locationId ?? null,
         // status 使用schema中定义的默认值 "pending"
-      },
+    };
+
+    // Construct nested creation for Room Types
+    if (roomTypes.length > 0) {
+        createData.roomTypes = {
+            create: roomTypes.map((rt: any) => ({
+                name: rt.name,
+                description: rt.description,
+                price: rt.price,
+                stock: rt.stock || 0,
+                discount: rt.discount || 1,
+            }))
+        };
+    }
+
+    // Construct nested creation for Hotel Tags
+    if (tagIds.length > 0) {
+        createData.hotelTags = {
+            create: tagIds.map((tagId: number) => ({
+                tag: {
+                    connect: { id: Number(tagId) }
+                }
+            }))
+        };
+    }
+
+    const newHotel = await prisma.hotel.create({
+      data: createData,
     });
 
     return NextResponse.json({ success: true, data: newHotel }, { status: 201 });

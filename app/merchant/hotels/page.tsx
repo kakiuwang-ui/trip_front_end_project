@@ -15,6 +15,9 @@ import {
   Select,
   DatePicker,
   App,
+  Card,
+  Row,
+  Col
 } from 'antd';
 import type { TableColumnsType, UploadFile, UploadProps } from 'antd';
 import {
@@ -23,8 +26,20 @@ import {
   DeleteOutlined,
   UploadOutlined,
 } from '@ant-design/icons';
-import { getMyHotels, createHotel, updateHotel, deleteHotel, uploadImage } from '@/app/services/hotel';
-import type { Hotel, Room } from '@/app/types';
+import { 
+  getMyHotels, 
+  createHotel, 
+  updateHotel, 
+  deleteHotel, 
+  uploadImage,
+  getLocations,
+  getTags,
+  createRoomType,
+  updateRoomType,
+  deleteRoomType
+} from '@/app/services/hotel';
+import { getStoredUser } from '@/app/services/auth';
+import type { Hotel, RoomType, Location, Tag as HotelTag } from '@/app/types';
 import dayjs from 'dayjs';
 
 const { TextArea } = Input;
@@ -32,13 +47,14 @@ const { Option } = Select;
 
 // 房型动态表单组件
 interface RoomListProps {
-  value?: Room[];
-  onChange?: (value: Room[]) => void;
+  value?: RoomType[];
+  onChange?: (value: RoomType[]) => void;
 }
 
 function RoomList({ value = [], onChange }: RoomListProps) {
   const handleAdd = () => {
-    onChange?.([...value, { room_type: '', price: 0, total_count: 1 }]);
+    // @ts-ignore - Temporary ID for key handling if needed, though index is used usually
+    onChange?.([...value, { name: '', price: 0, stock: 1, discount: 1, description: '' }]);
   };
 
   const handleRemove = (index: number) => {
@@ -47,40 +63,61 @@ function RoomList({ value = [], onChange }: RoomListProps) {
     onChange?.(newRooms);
   };
 
-  const handleChange = (index: number, field: keyof Room, val: any) => {
+  const handleChange = (index: number, field: keyof RoomType, val: any) => {
     const newRooms = [...value];
+    // @ts-ignore
     newRooms[index] = { ...newRooms[index], [field]: val };
     onChange?.(newRooms);
   };
 
   return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {value.map((room, index) => (
-        <Space key={index} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
-          <Input
-            placeholder="房型名称"
-            value={room.room_type}
-            onChange={(e) => handleChange(index, 'room_type', e.target.value)}
-            style={{ width: 150 }}
-          />
-          <InputNumber
-            placeholder="价格"
-            value={room.price}
-            onChange={(val) => handleChange(index, 'price', val || 0)}
-            min={0}
-            style={{ width: 120 }}
-          />
-          <InputNumber
-            placeholder="数量"
-            value={room.total_count}
-            onChange={(val) => handleChange(index, 'total_count', val || 1)}
-            min={1}
-            style={{ width: 100 }}
-          />
-          <Button type="link" danger onClick={() => handleRemove(index)}>
-            删除
-          </Button>
-        </Space>
+        <Card key={room.id || index} size="small" type="inner" title={`房型 ${index + 1}`} extra={
+            <Button type="link" danger onClick={() => handleRemove(index)}>
+                删除
+            </Button>
+        }>
+            <Row gutter={16}>
+                <Col span={8}>
+                     <Input
+                        placeholder="房型名称"
+                        value={room.name}
+                        onChange={(e) => handleChange(index, 'name', e.target.value)}
+                        addonBefore="名称"
+                        style={{ marginBottom: 8 }}
+                      />
+                </Col>
+                <Col span={8}>
+                    <InputNumber
+                        placeholder="价格"
+                        value={room.price}
+                        onChange={(val) => handleChange(index, 'price', val)}
+                        min={0}
+                        addonBefore="价格"
+                        style={{ width: '100%', marginBottom: 8 }}
+                    />
+                </Col>
+                 <Col span={8}>
+                    <InputNumber
+                        placeholder="库存"
+                        value={room.stock}
+                        onChange={(val) => handleChange(index, 'stock', val)}
+                        min={0}
+                        addonBefore="库存"
+                        style={{ width: '100%', marginBottom: 8 }}
+                    />
+                </Col>
+                <Col span={24}>
+                    <Input
+                        placeholder="房型描述（选填）"
+                        value={room.description}
+                        onChange={(e) => handleChange(index, 'description', e.target.value)}
+                        addonBefore="描述"
+                     />
+                </Col>
+            </Row>
+        </Card>
       ))}
       <Button type="dashed" onClick={handleAdd} block icon={<PlusOutlined />}>
         添加房型
@@ -91,6 +128,8 @@ function RoomList({ value = [], onChange }: RoomListProps) {
 
 export default function HotelManagementPage() {
   const [hotels, setHotels] = useState<Hotel[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [tags, setTags] = useState<HotelTag[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingHotel, setEditingHotel] = useState<Hotel | null>(null);
@@ -100,13 +139,16 @@ export default function HotelManagementPage() {
 
   useEffect(() => {
     fetchHotels();
+    fetchLocations();
+    fetchTags();
   }, []);
 
   const fetchHotels = async () => {
     try {
       setLoading(true);
-      const data = await getMyHotels();
-      setHotels(data);
+      const res = await getMyHotels();
+      // @ts-ignore
+      setHotels(res.data || res || []);
     } catch (error) {
       console.error('获取酒店列表失败:', error);
       message.error('获取酒店列表失败');
@@ -114,6 +156,26 @@ export default function HotelManagementPage() {
       setLoading(false);
     }
   };
+  
+  const fetchLocations = async () => {
+    try {
+        const res = await getLocations();
+        // @ts-ignore
+        setLocations(res.data || []);
+    } catch(e) {
+        console.error(e);
+    }
+  }
+
+  const fetchTags = async () => {
+      try {
+          const res = await getTags();
+          // @ts-ignore
+          setTags(res.data || []);
+      } catch(e) {
+          console.error(e);
+      }
+  }
 
   const handleAdd = () => {
     setEditingHotel(null);
@@ -128,19 +190,22 @@ export default function HotelManagementPage() {
     // 转换日期字段
     const formData: any = {
       ...record,
-      rooms: record.Rooms || [],
+      name: record.nameZh,
+      name_en: record.nameEn,
+      star_rating: record.starRating,
+      opening_date: record.openingYear ? dayjs(`${record.openingYear}-01-01`) : null,
+      locationId: record.locationId,
+      // map hotelTags from [{ tag: { id, name } }] to [id, id]
+      hotelTags: record.hotelTags?.map((ht: any) => ht.tagId || ht.tag?.id), 
+      rooms: record.roomTypes || [],
     };
-
-    if (record.opening_date) {
-      formData.opening_date = dayjs(record.opening_date);
-    }
 
     form.setFieldsValue(formData);
 
     // 设置已有图片
-    if (record.images && record.images.length > 0) {
+    if (record.images && Array.isArray(record.images) && record.images.length > 0) {
       setFileList(
-        record.images.map((url, index) => ({
+        (record.images as string[]).map((url, index) => ({
           uid: `-${index}`,
           name: `image-${index}`,
           status: 'done',
@@ -178,6 +243,12 @@ export default function HotelManagementPage() {
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
+      const currentUser = getStoredUser();
+      
+      if (!currentUser) {
+         message.error("未登录或会话已过期");
+         return;
+      }
 
       // 收集图片 URL
       const images = fileList
@@ -185,54 +256,84 @@ export default function HotelManagementPage() {
         .map((file) => file.url || (file.response as any)?.url)
         .filter(Boolean) as string[];
 
-      // 转换日期格式
+      // 1. 准备酒店数据
       const hotelData: any = {
-        ...values,
+        nameZh: values.name,
+        nameEn: values.name_en,
+        address: values.address,
+        locationId: values.locationId,
+        starRating: values.star_rating,
+        description: values.description,
+        openingYear: values.opening_date ? values.opening_date.year() : undefined,
         images,
+        merchantId: currentUser.id,
+        // Pass nested data for creation
+        tagIds: values.hotelTags, 
+        roomTypes: values.rooms, 
       };
 
-      if (values.opening_date) {
-        hotelData.opening_date = values.opening_date.format('YYYY-MM-DD');
-      }
+      let savedHotelId: number;
 
-      if (editingHotel) {
-        await updateHotel(editingHotel.id!, hotelData);
-        message.success('更新成功');
+      if (editingHotel && editingHotel.id) {
+        // For updates, we still mostly use the loop logic for rooms as backend update might not support nested upsert easily
+        // But we can update basic info
+        await updateHotel(editingHotel.id, hotelData); // Note: tagIds might need special handling on update if backend supports it, otherwise ignored
+        savedHotelId = editingHotel.id;
+        message.success('酒店基本信息更新成功');
+        
+        // Handle Rooms for Edit Mode (Manually sync)
+        if (values.rooms) {
+           const currentRooms = values.rooms as RoomType[];
+           const originalIds = editingHotel.roomTypes?.map(r => r.id) || [];
+           // @ts-ignore
+           const currentIds = currentRooms.map(r => r.id).filter(id => !!id);
+           
+           // Delete
+           const toDelete = originalIds.filter(id => !currentIds.includes(id));
+           for (const id of toDelete) {
+               await deleteRoomType(id);
+           }
+            // Upsert
+           for (const room of currentRooms) {
+               if (room.id) {
+                   await updateRoomType(room.id, room);
+               } else {
+                   await createRoomType(savedHotelId, room);
+               }
+           }
+       }
+
       } else {
-        await createHotel(hotelData);
-        message.success('创建成功');
+        // For Creation, Backend now supports nested roomTypes and tagIds!
+        // So we just send it all at once.
+        const res = await createHotel(hotelData);
+        message.success('酒店创建成功');
       }
 
       setModalVisible(false);
       fetchHotels();
     } catch (error: any) {
       console.error('提交失败:', error);
-      message.error(error.response?.data?.message || '提交失败');
+      message.error(error.message || '提交失败');
     }
   };
 
   const columns: TableColumnsType<Hotel> = [
     {
       title: '酒店名称',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'nameZh',
+      key: 'nameZh',
     },
     {
       title: '城市',
-      dataIndex: 'city',
       key: 'city',
+      render: (_, record) => record.location?.name || '未知',
     },
     {
       title: '星级',
-      dataIndex: 'star_rating',
-      key: 'star_rating',
+      dataIndex: 'starRating',
+      key: 'starRating',
       render: (rating: number) => `${rating}星`,
-    },
-    {
-      title: '起始价格',
-      dataIndex: 'price',
-      key: 'price',
-      render: (price: number) => `¥${price}`,
     },
     {
       title: '状态',
@@ -240,9 +341,10 @@ export default function HotelManagementPage() {
       key: 'status',
       render: (status: string) => {
         const statusMap: Record<string, { color: string; text: string }> = {
-          draft: { color: 'default', text: '草稿' },
+          pending: { color: 'processing', text: '审核中' },
+          rejected: { color: 'error', text: '已驳回' },
           published: { color: 'success', text: '已发布' },
-          offline: { color: 'error', text: '已下线' },
+          offline: { color: 'default', text: '已下线' },
         };
         const { color, text } = statusMap[status] || { color: 'default', text: status };
         return <Tag color={color}>{text}</Tag>;
@@ -305,11 +407,11 @@ export default function HotelManagementPage() {
           layout="vertical"
           initialValues={{
             star_rating: 3,
-            rooms: [{ room_type: '', price: 0, total_count: 1 }],
+            rooms: [{ name: '', price: 0, stock: 1 }],
           }}
         >
           <Form.Item
-            label="酒店名称"
+            label="酒店名称 (中文)"
             name="name"
             rules={[{ required: true, message: '请输入酒店名称' }]}
           >
@@ -321,11 +423,15 @@ export default function HotelManagementPage() {
           </Form.Item>
 
           <Form.Item
-            label="城市"
-            name="city"
-            rules={[{ required: true, message: '请输入城市' }]}
+            label="城市/位置"
+            name="locationId"
+            rules={[{ required: true, message: '请选择城市' }]}
           >
-            <Input placeholder="请输入城市" />
+             <Select placeholder="请选择城市">
+                {locations.map(loc => (
+                    <Option key={loc.id} value={loc.id}>{loc.name}</Option>
+                ))}
+             </Select>
           </Form.Item>
 
           <Form.Item
@@ -351,39 +457,26 @@ export default function HotelManagementPage() {
           </Form.Item>
 
           <Form.Item
-            label="起始价格"
-            name="price"
-            rules={[{ required: true, message: '请输入价格' }]}
-          >
-            <InputNumber
-              min={0}
-              style={{ width: '100%' }}
-              placeholder="请输入起始价格"
-            />
-          </Form.Item>
-
-          <Form.Item
             label="酒店开业时间"
             name="opening_date"
             rules={[{ required: true, message: '请选择酒店开业时间' }]}
           >
             <DatePicker
+              picker="year"
               style={{ width: '100%' }}
-              placeholder="请选择开业时间"
+              placeholder="请选择开业年份"
             />
           </Form.Item>
 
-          <Form.Item label="设施" name="facilities">
+          <Form.Item label="标签" name="hotelTags">
             <Select
-              mode="tags"
-              placeholder="输入设施名称后按回车"
+              mode="multiple"
+              placeholder="请选择标签"
               style={{ width: '100%' }}
             >
-              <Option value="WiFi">WiFi</Option>
-              <Option value="停车场">停车场</Option>
-              <Option value="游泳池">游泳池</Option>
-              <Option value="健身房">健身房</Option>
-              <Option value="餐厅">餐厅</Option>
+              {tags.map(tag => (
+                  <Option key={tag.id} value={tag.id}>{tag.name}</Option>
+              ))}
             </Select>
           </Form.Item>
 
@@ -413,7 +506,6 @@ export default function HotelManagementPage() {
           <Form.Item
             label="房型列表"
             name="rooms"
-            rules={[{ required: true, message: '请至少添加一个房型' }]}
           >
             <RoomList />
           </Form.Item>

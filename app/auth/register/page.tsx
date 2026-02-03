@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Form, Input, Button, Card, Typography, Select, App } from 'antd';
-import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
+import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
-import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import { register } from '@/app/services/auth';
 import type { RegisterData } from '@/app/types';
@@ -17,7 +16,6 @@ export default function RegisterPage() {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const { message } = App.useApp();
-  const { theme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
@@ -30,18 +28,16 @@ export default function RegisterPage() {
       const { confirmPassword, ...registerData } = values;
       await register(registerData);
 
-      message.success('注册成功，请登录');
+      message.success('注册成功，请使用新账号登录');
       router.push('/auth/login');
     } catch (error: any) {
       console.error('注册失败:', error);
-      message.error(error.response?.data?.message || '注册失败，请重试');
+      message.error(error.response?.data?.error || '注册失败，请检查填写信息');
     } finally {
       setLoading(false);
     }
   };
 
-  // 只在客户端挂载后才使用主题，避免 SSR 不一致
-  const isDark = mounted ? theme === 'dark' : false;
 
   return (
     <div
@@ -51,9 +47,7 @@ export default function RegisterPage() {
         justifyContent: 'center',
         alignItems: 'center',
         minHeight: '100vh',
-        background: isDark
-          ? 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)'
-          : 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
       }}
     >
       <Card
@@ -62,9 +56,7 @@ export default function RegisterPage() {
           width: '100%',
           maxWidth: 450,
           margin: 20,
-          boxShadow: isDark
-            ? '0 8px 24px rgba(0, 0, 0, 0.4)'
-            : '0 8px 24px rgba(0, 0, 0, 0.15)',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
           borderRadius: 8,
         }}
         styles={{
@@ -85,19 +77,7 @@ export default function RegisterPage() {
           size="large"
         >
           <Form.Item
-            name="name"
-            rules={[
-              { required: true, message: '请输入姓名' },
-              { min: 2, message: '姓名至少 2 个字符' },
-            ]}
-          >
-            <Input
-              prefix={<UserOutlined />}
-              placeholder="姓名"
-            />
-          </Form.Item>
 
-          <Form.Item
             name="email"
             rules={[
               { required: true, message: '请输入邮箱' },
@@ -154,6 +134,30 @@ export default function RegisterPage() {
               placeholder="确认密码"
             />
           </Form.Item>
+          
+          <Form.Item
+            name="name"
+            rules={[
+               { required: true, message: '请输入姓名/昵称' }
+            ]}
+          >
+             <Input
+               prefix={<UserOutlined />}
+               placeholder="姓名"
+             />
+          </Form.Item>
+
+          <Form.Item
+             name="phone"
+             rules={[
+                 { pattern: /^[0-9-]{6,20}$/, message: '请输入有效的电话号码' }
+             ]}
+          >
+             <Input
+               prefix={<PhoneOutlined />}
+               placeholder="电话号码 (选填)"
+             />
+          </Form.Item>
 
           <Form.Item
             name="role"
@@ -161,7 +165,7 @@ export default function RegisterPage() {
           >
             <Select placeholder="选择角色">
               <Option value="merchant">商户</Option>
-              <Option value="admin">管理员</Option>
+              <Option value="user">普通用户</Option>
             </Select>
           </Form.Item>
 

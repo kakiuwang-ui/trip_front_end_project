@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 
 // 创建 axios 实例
 const request = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || '/api',
+  baseURL: '/api',
   timeout: 10000,
 });
 
@@ -32,17 +32,14 @@ request.interceptors.response.use(
     // 错误处理（移除 message 调用，错误在组件中处理）
     if (error.response) {
       const { status } = error.response;
+      const url = error.config?.url;
 
-      // 401 未授权，清除 token 并跳转到登录页（但不在登录/注册页面时重定向）
-      if (status === 401 && typeof window !== 'undefined') {
-        const currentPath = window.location.pathname;
-        const isAuthPage = currentPath.startsWith('/auth/');
-
-        if (!isAuthPage) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          window.location.href = '/auth/login';
-        }
+      // 401 未授权，清除 token 并跳转到登录页
+      // 注意：排除登录接口本身的 401 错误（即账号密码错误的情况），避免重复跳转
+      if (status === 401 && typeof window !== 'undefined' && !url?.includes('/auth/login')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/auth/login';
       }
     }
 

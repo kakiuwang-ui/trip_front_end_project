@@ -15,7 +15,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useMerchantAuth } from '@/app/hooks/useAuth';
 import { logout } from '@/app/services/auth';
-import { ThemeToggle } from '@/app/components/ThemeToggle';
 
 const { Header, Sider, Content } = Layout;
 
@@ -135,7 +134,6 @@ export default function MerchantLayout({
             商户管理系统
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <ThemeToggle />
             <Dropdown menu={{ items: userMenuItems }}>
               <div
                 style={{
@@ -146,7 +144,7 @@ export default function MerchantLayout({
                 }}
               >
                 <Avatar icon={<UserOutlined />} />
-                <span>{user?.username}</span>
+                <span>{user?.name}</span>
               </div>
             </Dropdown>
           </div>

@@ -93,8 +93,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. 查找对应的角色ID
-    const roleName = role === 'merchant' ? 'MERCHANT' : 'USER'; // 假设数据库中角色是大写
+    // 2. 查找对应的角色名的ID
+    const roleName = role.toLowerCase();
     
     let dbRole = await prisma.role.findUnique({
       where: { name: roleName },

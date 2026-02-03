@@ -1,142 +1,176 @@
 // 用户相关类型
-export type UserRole = 'USER' | 'MERCHANT' | 'ADMIN';
-
 export interface Role {
   id: number;
-  name: UserRole;
+  name: string;
   description?: string;
 }
 
 export interface User {
   id: number;
-  name?: string;
   email: string;
   phone?: string;
-  roleId?: number | null;
-  role?: Role | null;
+  name?: string;
+  roleId?: number;
+  role?: Role;
   createdAt?: string;
 }
 
 export interface AuthResponse {
-  token: string;
+  success: boolean;
+  accessToken: string;
+  refreshToken: string;
   user: User;
-  refreshToken?: string;
 }
 
 export interface LoginData {
-  username: string;
+  email: string;
   password: string;
 }
 
 export interface RegisterData {
-  name: string;
   email: string;
   password: string;
+  name?: string;
   phone?: string;
-  role: 'user' | 'merchant';
+  role: 'user' | 'merchant'; // API 期望字符串枚举
 }
 
 // 酒店相关类型
-export type HotelStatus = 'draft' | 'published' | 'offline';
+export type HotelStatus = 'pending' | 'published' | 'rejected' | 'offline';
 
-export interface Room {
-  id?: number;
-  room_type: string;
+export interface Location {
+  id: number;
+  name: string;
+  description?: string;
+}
+
+export interface Tag {
+  id: number;
+  name: string;
+}
+
+export interface RoomType {
+  id: number;
+  hotelId?: number;
+  name: string;
+  description?: string;
   price: number;
-  total_count: number;
-  available_count?: number;
-  bed_type?: string;
-  size?: string;
-  max_guests?: number;
+  discount: number;
+  amenities?: string[];
+  images?: string[];
+  stock: number;
+  availability?: RoomAvailability[];
+}
+
+export interface RoomAvailability {
+  id: number;
+  roomTypeId: number;
+  date: string;
+  price?: number;
+  quota?: number;
+  booked: number;
+  isClosed: boolean;
 }
 
 export interface Hotel {
-  id?: number;
-  name: string;
-  name_en?: string;
-  city: string;
+  id: number;
+  merchantId?: number;
+  locationId?: number;
+  nameZh: string;
+  nameEn?: string;
   address: string;
-  star_rating: number;
-  price: number;
-  opening_date: string;
-  facilities: string[];
-  description: string;
-  images: string[];
-  status?: HotelStatus;
-  Rooms?: Room[];
+  starRating?: number;
+  description?: string;
+  facilities?: string[];
+  openingYear?: number;
+  images?: string[];
+  status: HotelStatus;
+  rejectionReason?: string;
   createdAt?: string;
   updatedAt?: string;
+  location?: Location;
+  merchant?: User;
+  roomTypes?: RoomType[];
+  hotelTags?: { tag: Tag }[];
 }
 
-export interface HotelFormData extends Omit<Hotel, 'id' | 'createdAt' | 'updatedAt'> {
-  Rooms: Room[];
+export interface HotelFormData {
+  nameZh: string;
+  nameEn?: string;
+  address: string;
+  locationId?: number;
+  starRating?: number;
+  description?: string;
+  facilities?: string[];
+  openingYear?: number;
+  images?: string[];
+  merchantId: number;
 }
 
 // 搜索和筛选相关类型
 export interface HotelSearchParams {
-  city?: string;
+  locationId?: number;
+  status?: HotelStatus;
+  tags?: string;
   keyword?: string;
   checkInDate?: string;
   checkOutDate?: string;
-  starRating?: number[];
-  minPrice?: number;
-  maxPrice?: number;
-  facilities?: string[];
   page?: number;
   limit?: number;
-  sortBy?: 'default' | 'price_asc' | 'price_desc';
 }
 
 export interface HotelListResponse {
-  hotels: Hotel[];
-  total: number;
-  page: number;
-  limit: number;
-  hasMore: boolean;
+  success: boolean;
+  data: Hotel[];
+  total?: number;
+  page?: number;
+  limit?: number;
 }
 
 // 预订相关类型
-export type BookingStatus = 'pending' | 'confirmed' | 'checked_in' | 'checked_out' | 'cancelled';
+export type BookingStatus = 'pending' | 'completed' | 'cancelled';
 
 export interface Booking {
-  id?: number;
-  hotel_id: number;
-  hotel_name?: string;
-  room_type: string;
-  customer_name: string;
-  customer_phone: string;
-  customer_email?: string;
-  check_in_date: string;
-  check_out_date: string;
-  room_count: number;
-  total_price: number;
+  id: number;
+  userId?: number;
+  hotelId?: number;
+  roomTypeId?: number;
+  checkInDate: string;
+  checkOutDate: string;
+  guestCount: number;
+  totalPrice: number;
   status: BookingStatus;
-  special_requests?: string;
-  created_at?: string;
-  updated_at?: string;
+  guestInfo?: any;
+  createdAt?: string;
+  hotel?: Hotel;
+  roomType?: RoomType;
+  user?: User;
 }
 
 export interface BookingFormData {
-  hotel_id: number;
-  room_type: string;
-  customer_name: string;
-  customer_phone: string;
-  customer_email?: string;
-  check_in_date: string;
-  check_out_date: string;
-  room_count: number;
-  special_requests?: string;
+  hotelId: number;
+  roomTypeId: number;
+  checkInDate: string;
+  checkOutDate: string;
+  guestCount: number;
+  guestInfo?: any;
 }
 
 // 审核相关类型
-export interface ReviewData {
-  status: 'published' | 'rejected';
-  reason?: string;
+export interface HotelAuditLog {
+  id: number;
+  hotelId: number;
+  operatorId?: number;
+  oldStatus?: string;
+  newStatus: string;
+  comment?: string;
+  createdAt: string;
+  operator?: User;
 }
 
-export interface ReviewResponse {
-  message: string;
-  hotel: Hotel;
+export interface ReviewActionData {
+  status: 'published' | 'rejected';
+  rejectionReason?: string;
 }
 
 // API 响应通用类型
@@ -148,17 +182,6 @@ export interface ApiResponse<T = any> {
 }
 
 // 常量
-export const CITIES = [
-  '北京',
-  '上海',
-  '广州',
-  '深圳',
-  '杭州',
-  '成都',
-  '西安',
-  '南京',
-] as const;
-
 export const STAR_RATINGS = [1, 2, 3, 4, 5] as const;
 
 export const FACILITIES = [
@@ -181,6 +204,7 @@ export const PRICE_RANGES = [
   { label: '1000元以上', min: 1000, max: Infinity },
 ] as const;
 
+// 快速标签 - 前端写死的，后端也有 Tag 表，这里保留作为常用推荐
 export const QUICK_TAGS = [
   '亲子',
   '豪华',
