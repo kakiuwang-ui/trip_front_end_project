@@ -17,7 +17,8 @@ import {
   App,
   Card,
   Row,
-  Col
+  Col,
+  Image
 } from 'antd';
 import type { TableColumnsType, UploadFile, UploadProps } from 'antd';
 import {
@@ -73,7 +74,7 @@ function RoomList({ value = [], onChange }: RoomListProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {value.map((room, index) => (
-        <Card key={room.id || index} size="small" type="inner" title={`房型 ${index + 1}`} extra={
+        <Card key={room.id ? `room-${room.id}` : `idx-${index}`} size="small" type="inner" title={`房型 ${index + 1}`} extra={
             <Button type="link" danger onClick={() => handleRemove(index)}>
                 删除
             </Button>
@@ -94,7 +95,7 @@ function RoomList({ value = [], onChange }: RoomListProps) {
                         value={room.price}
                         onChange={(val) => handleChange(index, 'price', val)}
                         min={0}
-                        addonBefore="价格"
+                        prefix="价格"
                         style={{ width: '100%', marginBottom: 8 }}
                     />
                 </Col>
@@ -104,7 +105,7 @@ function RoomList({ value = [], onChange }: RoomListProps) {
                         value={room.stock}
                         onChange={(val) => handleChange(index, 'stock', val)}
                         min={0}
-                        addonBefore="库存"
+                        prefix="库存"
                         style={{ width: '100%', marginBottom: 8 }}
                     />
                 </Col>
@@ -264,7 +265,7 @@ export default function HotelManagementPage() {
         locationId: values.locationId,
         starRating: values.star_rating,
         description: values.description,
-        openingYear: values.opening_date ? values.opening_date.year() : undefined,
+        openingYear: values.opening_date ? values.opening_date.year() : 2020,
         images,
         merchantId: currentUser.id,
         // Pass nested data for creation
@@ -320,25 +321,84 @@ export default function HotelManagementPage() {
 
   const columns: TableColumnsType<Hotel> = [
     {
-      title: '酒店名称',
-      dataIndex: 'nameZh',
-      key: 'nameZh',
+      title: '酒店信息',
+      key: 'info',
+      width: 300,
+      render: (_, record) => (
+        <Space align="start">
+            {record.images && record.images.length > 0 ? (
+                <Image
+                    src={record.images[0]}
+                    width={80}
+                    height={80}
+                    style={{ objectFit: 'cover', borderRadius: 4 }}
+                    preview={{ src: record.images[0] }}
+                />
+            ) : (
+                <div style={{ width: 80, height: 80, background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 4, color: '#999', fontSize: 12 }}>
+                    暂无图片
+                </div>
+            )}
+            <div>
+                <div style={{ fontWeight: 'bold', fontSize: 15 }}>{record.nameZh}</div>
+                {record.nameEn && <div style={{ fontSize: 12, color: '#666' }}>{record.nameEn}</div>}
+                <div style={{ fontSize: 12, marginTop: 4 }}>
+                   <span style={{ color: '#faad14' }}>{record.starRating}星级</span> 
+                   <span style={{ margin: '0 4px', color: '#ddd' }}>|</span>
+                   {record.openingYear ? `${record.openingYear}年开业` : '开业年份未知'}
+                </div>
+                <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>{record.address}</div>
+            </div>
+        </Space>
+      )
     },
     {
-      title: '城市',
-      key: 'city',
-      render: (_, record) => record.location?.name || '未知',
+      title: '位置/标签',
+      key: 'tags',
+      width: 200,
+      render: (_, record) => (
+        <Space orientation="vertical" size="small" style={{ width: '100%' }}>
+            <div>
+                <Tag color="cyan">{record.location?.name || '未知城市'}</Tag>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                 {record.hotelTags?.map((item: any, index) => {
+                     const tagName = item.tag ? item.tag.name : (item.name || '未知');
+                     return <Tag key={index} color="blue" style={{ marginRight: 0 }}>{tagName}</Tag>
+                 })}
+                 {(!record.hotelTags || record.hotelTags.length === 0) && <span style={{ color: '#ccc', fontSize: 12 }}>无标签</span>}
+            </div>
+        </Space>
+      )
     },
     {
-      title: '星级',
-      dataIndex: 'starRating',
-      key: 'starRating',
-      render: (rating: number) => `${rating}星`,
+      title: '房型概览',
+      key: 'rooms',
+      width: 250,
+      render: (_, record) => {
+          if (!record.roomTypes || record.roomTypes.length === 0) {
+              return <span style={{ color: '#999' }}>暂无房型</span>;
+          }
+          return (
+              <div style={{ maxHeight: 100, overflowY: 'auto', border: '1px solid #f0f0f0', borderRadius: 4, padding: 4 }}>
+                  {record.roomTypes.map(room => (
+                      <div key={room.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 12, borderBottom: '1px dashed #f0f0f0', paddingBottom: 2 }}>
+                          <span style={{ fontWeight: 500 }}>{room.name}</span>
+                          <span>
+                              <span style={{ color: '#f50', fontWeight: 'bold' }}>¥{room.price}</span>
+                              <span style={{ color: '#999', marginLeft: 8 }}>库存:{room.stock}</span>
+                          </span>
+                      </div>
+                  ))}
+              </div>
+          )
+      }
     },
     {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
+      width: 100,
       render: (status: string) => {
         const statusMap: Record<string, { color: string; text: string }> = {
           pending: { color: 'processing', text: '审核中' },
@@ -353,6 +413,7 @@ export default function HotelManagementPage() {
     {
       title: '操作',
       key: 'action',
+      width: 150,
       render: (_, record) => (
         <Space>
           <Button

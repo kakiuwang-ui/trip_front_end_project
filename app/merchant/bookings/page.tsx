@@ -13,6 +13,9 @@ import {
   DatePicker,
   App,
   Popconfirm,
+  Modal,
+  Form,
+  InputNumber
 } from 'antd';
 import type { TableColumnsType } from 'antd';
 import {
@@ -21,13 +24,16 @@ import {
   CloseOutlined,
   LoginOutlined,
   LogoutOutlined,
+  PlusOutlined,
 } from '@ant-design/icons';
-import type { Booking, BookingStatus } from '@/app/types';
-import { getMyBookings, updateBookingStatus } from '@/app/services/booking';
+import type { Booking, BookingStatus, Hotel, RoomType } from '@/app/types';
+import { getMyBookings, updateBookingStatus, createBooking } from '@/app/services/booking';
+import { getMyHotels } from '@/app/services/hotel';
 import dayjs from 'dayjs';
 
 const { RangePicker } = DatePicker;
-const { Search } = Input;
+const { Search, TextArea } = Input;
+const { Option } = Select;
 
 export default function BookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -36,11 +42,29 @@ export default function BookingsPage() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [statusFilter, setStatusFilter] = useState<BookingStatus | 'all'>('all');
   const [searchText, setSearchText] = useState('');
+  
+  // Creation States
+  const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [hotels, setHotels] = useState<Hotel[]>([]);
+  const [selectedHotelRooms, setSelectedHotelRooms] = useState<RoomType[]>([]);
+  const [bookingForm] = Form.useForm();
+  
   const { message } = App.useApp();
 
   useEffect(() => {
     fetchBookings();
+    fetchHotels();
   }, []);
+
+  const fetchHotels = async () => {
+      try {
+          const res = await getMyHotels();
+          // @ts-ignore
+          setHotels(res.data || res || []);
+      } catch (e) {
+          console.error(e);
+      }
+  };
 
   const fetchBookings = async () => {
     try {
@@ -53,6 +77,52 @@ export default function BookingsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleHotelChange = (hotelId: number) => {
+      const hotel = hotels.find(h => h.id === hotelId);
+      if (hotel) {
+          // @ts-ignore
+          setSelectedHotelRooms(hotel.roomTypes || []);
+          bookingForm.setFieldsValue({ roomTypeId: undefined });
+      }
+  };
+
+  const handleCreate = () => {
+      bookingForm.resetFields();
+      setCreateModalVisible(true);
+  };
+
+  const handleSubmitCreate = async () => {
+      try {
+          const values = await bookingForm.validateFields();
+          const { dateRange, ...rest } = values;
+          
+          if (!dateRange || dateRange.length !== 2) {
+              message.error('请选择日期');
+              return;
+          }
+
+          const bookingData = {
+              ...rest,
+              checkInDate: dateRange[0].format('YYYY-MM-DD'),
+              checkOutDate: dateRange[1].format('YYYY-MM-DD'),
+              guestInfo: {
+                  name: values.guestName,
+                  phone: values.guestPhone,
+                  email: values.guestEmail,
+                  specialRequests: values.specialRequests
+              }
+          };
+
+          await createBooking(bookingData);
+          message.success('创建预订成功');
+          setCreateModalVisible(false);
+          fetchBookings();
+      } catch (e: any) {
+          console.error(e);
+          message.error(e.message || '创建失败');
+      }
   };
 
   const handleView = (record: Booking) => {
@@ -266,26 +336,31 @@ export default function BookingsPage() {
 
   return (
     <div>
-      <div style={{ marginBottom: 16, display: 'flex', gap: 16 }}>
-        <Search
-          placeholder="搜索客户姓名、电话、酒店"
-          allowClear
-          style={{ width: 300 }}
-          onSearch={setSearchText}
-          onChange={(e) => setSearchText(e.target.value)}
-        />
-        <Select
-          style={{ width: 150 }}
-          value={statusFilter}
-          onChange={setStatusFilter}
-        >
-          <Select.Option value="all">全部状态</Select.Option>
-          <Select.Option value="pending">待确认</Select.Option>
-          <Select.Option value="confirmed">已确认</Select.Option>
-          <Select.Option value="checked_in">已入住</Select.Option>
-          <Select.Option value="checked_out">已退房</Select.Option>
-          <Select.Option value="cancelled">已取消</Select.Option>
-        </Select>
+      <div style={{ marginBottom: 16, display: 'flex', gap: 16, justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', gap: 16 }}>
+             <Search
+              placeholder="搜索客户姓名、电话、酒店"
+              allowClear
+              style={{ width: 300 }}
+              onSearch={setSearchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+            <Select
+              style={{ width: 150 }}
+              value={statusFilter}
+              onChange={setStatusFilter}
+            >
+              <Select.Option value="all">全部状态</Select.Option>
+              <Select.Option value="pending">待确认</Select.Option>
+              <Select.Option value="confirmed">已确认</Select.Option>
+              <Select.Option value="checked_in">已入住</Select.Option>
+              <Select.Option value="checked_out">已退房</Select.Option>
+              <Select.Option value="cancelled">已取消</Select.Option>
+            </Select>
+        </div>
+        <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+            创建预订
+        </Button>
       </div>
 
       <Table
@@ -296,6 +371,64 @@ export default function BookingsPage() {
         pagination={{ pageSize: 10 }}
         scroll={{ x: 1200 }}
       />
+      
+      <Modal
+        title="创建新预订"
+        open={createModalVisible}
+        onOk={handleSubmitCreate}
+        onCancel={() => setCreateModalVisible(false)}
+        width={600}
+      >
+          <Form
+            form={bookingForm}
+            layout="vertical"
+            initialValues={{ guestCount: 1 }}
+          >
+              <Form.Item label="选择酒店" name="hotelId" rules={[{ required: true, message: '请选择酒店' }]}>
+                  <Select placeholder="请选择酒店" onChange={handleHotelChange}>
+                      {hotels.map(hotel => (
+                          <Option key={hotel.id} value={hotel.id}>{hotel.nameZh}</Option>
+                      ))}
+                  </Select>
+              </Form.Item>
+              
+              <Form.Item label="选择房型" name="roomTypeId" rules={[{ required: true, message: '请选择房型' }]}>
+                  <Select placeholder="请选择房型" disabled={!selectedHotelRooms.length}>
+                       {selectedHotelRooms.map(room => (
+                          <Option key={room.id} value={room.id}>
+                              {room.name} (剩余: {room.stock}, 价格: ¥{room.price})
+                          </Option>
+                      ))}
+                  </Select>
+              </Form.Item>
+              
+              <Form.Item label="入住日期" name="dateRange" rules={[{ required: true, message: '请选择日期' }]}>
+                  <RangePicker style={{ width: '100%' }} />
+              </Form.Item>
+              
+              <Form.Item label="入住人数" name="guestCount" rules={[{ required: true }]}>
+                  <InputNumber min={1} max={10} style={{ width: '100%' }} />
+              </Form.Item>
+              
+              <Descriptions title="客户信息" size="small" style={{ marginTop: 16 }} />
+              
+               <Form.Item label="客户姓名" name="guestName" rules={[{ required: true }]}>
+                  <Input placeholder="姓名" />
+              </Form.Item>
+              
+               <Form.Item label="联系电话" name="guestPhone" rules={[{ required: true }]}>
+                  <Input placeholder="电话" />
+              </Form.Item>
+              
+               <Form.Item label="电子邮箱" name="guestEmail">
+                  <Input placeholder="邮箱（选填）" />
+              </Form.Item>
+              
+              <Form.Item label="特殊要求" name="specialRequests">
+                  <TextArea rows={2} placeholder="如有特殊要求请注明" />
+              </Form.Item>
+          </Form>
+      </Modal>
 
       <Drawer
         title="预订详情"

@@ -125,6 +125,7 @@ export async function GET(request: NextRequest) {
         location: true, // 包含关联的Location信息
         merchant: { select: { id: true, name: true, email: true } }, // 包含商户的部分信息
         hotelTags: { include: { tag: true } }, // 返回酒店的标签信息
+        roomTypes: true, // 包含关联的房型信息
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -173,6 +174,14 @@ export async function GET(request: NextRequest) {
  *               facilities:
  *                 type: object
  *                 description: 设施列表 (JSON格式)
+ *               openingYear:
+ *                 type: integer
+ *                 description: 开业年份
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: 酒店图片URL列表
  *               merchantId:
  *                 type: integer
  *                 description: 商户ID
@@ -217,6 +226,8 @@ export async function POST(request: NextRequest) {
         starRating: starRating ?? null,
         description: body.description,
         facilities: body.facilities, // 注意：facilities是Json类型
+        openingYear: body.openingYear ? Number(body.openingYear) : null,
+        images: body.images,
         merchantId,
         locationId: locationId ?? null,
         // status 使用schema中定义的默认值 "pending"

@@ -267,7 +267,7 @@ export default function CalendarPage() {
       <Drawer
         title={selectedDate ? `${selectedDate.format('YYYY年MM月DD日')} 房间详情` : ''}
         placement="right"
-        width={600}
+        size={600}
         onClose={() => setDrawerVisible(false)}
         open={drawerVisible}
       >

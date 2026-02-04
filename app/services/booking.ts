@@ -1,5 +1,6 @@
-import { get, put, del } from '@/app/lib/request';
-import type { Booking, BookingStatus, ApiResponse } from '@/app/types';
+import { start } from 'repl';
+import { get, put, del, post } from '@/app/lib/request';
+import type { Booking, BookingStatus, ApiResponse, BookingFormData } from '@/app/types';
 import { getStoredUser } from './auth';
 
 /**
@@ -46,6 +47,14 @@ export const cancelBooking = async (id: number) => {
     status: 'cancelled'
   });
   return response;
+};
+
+/**
+ * 创建预订
+ */
+export const createBooking = async (data: BookingFormData) => {
+  const response = await post<ApiResponse<Booking>>('/bookings', data);
+  return response.data;
 };
 
 /**
