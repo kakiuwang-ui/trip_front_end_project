@@ -116,28 +116,32 @@ export default function ReviewSystemPage() {
     }
   };
 
+  const getMinPrice = (record: Hotel) => {
+      if (!record.roomTypes || record.roomTypes.length === 0) return 0;
+      return Math.min(...record.roomTypes.map(r => r.price));
+  }
+
   const columns: TableColumnsType<Hotel> = [
     {
       title: '酒店名称',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'nameZh',
+      key: 'nameZh',
     },
     {
       title: '城市',
-      dataIndex: 'city',
       key: 'city',
+      render: (_, record) => record.location?.name || '未知',
     },
     {
       title: '星级',
-      dataIndex: 'star_rating',
-      key: 'star_rating',
+      dataIndex: 'starRating',
+      key: 'starRating',
       render: (rating: number) => `${rating}星`,
     },
     {
-      title: '价格',
-      dataIndex: 'price',
+      title: '起价',
       key: 'price',
-      render: (price: number) => `¥${price}`,
+      render: (_, record) => `¥${getMinPrice(record)}`,
     },
     {
       title: '状态',
@@ -258,25 +262,22 @@ export default function ReviewSystemPage() {
           <>
             <Descriptions column={1} bordered>
               <Descriptions.Item label="酒店名称">
-                {selectedHotel.name}
+                {selectedHotel.nameZh}
               </Descriptions.Item>
               <Descriptions.Item label="英文名称">
-                {selectedHotel.name_en || '-'}
+                {selectedHotel.nameEn || '-'}
               </Descriptions.Item>
               <Descriptions.Item label="城市">
-                {selectedHotel.city}
+                {selectedHotel.location?.name || '未知'}
               </Descriptions.Item>
               <Descriptions.Item label="地址">
                 {selectedHotel.address}
               </Descriptions.Item>
               <Descriptions.Item label="星级">
-                {selectedHotel.star_rating}星
-              </Descriptions.Item>
-              <Descriptions.Item label="价格">
-                ¥{selectedHotel.price}
+                {selectedHotel.starRating}星
               </Descriptions.Item>
               <Descriptions.Item label="设施">
-                {selectedHotel.facilities?.join(', ') || '-'}
+                {Array.isArray(selectedHotel.facilities) ? selectedHotel.facilities.join(', ') : '-'}
               </Descriptions.Item>
               <Descriptions.Item label="描述">
                 {selectedHotel.description || '-'}
@@ -306,23 +307,22 @@ export default function ReviewSystemPage() {
               </div>
             )}
 
-            {selectedHotel.Rooms && selectedHotel.Rooms.length > 0 && (
+            {selectedHotel.roomTypes && selectedHotel.roomTypes.length > 0 && (
               <div style={{ marginTop: 16 }}>
                 <h4>房型列表</h4>
                 <Table
-                  dataSource={selectedHotel.Rooms}
+                  dataSource={selectedHotel.roomTypes}
                   rowKey="id"
                   pagination={false}
                   columns={[
-                    { title: '房型', dataIndex: 'room_type', key: 'room_type' },
+                    { title: '房型', dataIndex: 'name', key: 'name' },
                     {
                       title: '价格',
                       dataIndex: 'price',
                       key: 'price',
                       render: (price: number) => `¥${price}`,
                     },
-                    { title: '总数', dataIndex: 'total_count', key: 'total_count' },
-                    { title: '可用', dataIndex: 'available_count', key: 'available_count' },
+                    { title: '库存', dataIndex: 'stock', key: 'stock' }
                   ]}
                 />
               </div>
@@ -349,3 +349,4 @@ export default function ReviewSystemPage() {
     </div>
   );
 }
+

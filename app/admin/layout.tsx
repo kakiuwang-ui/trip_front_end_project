@@ -7,12 +7,14 @@ import {
   AuditOutlined,
   UserOutlined,
   LogoutOutlined,
+  ShopOutlined,
+  TagsOutlined,
+  EnvironmentOutlined,
 } from '@ant-design/icons';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useAdminAuth } from '@/app/hooks/useAuth';
 import { logout } from '@/app/services/auth';
-import { ThemeToggle } from '@/app/components/ThemeToggle';
 
 const { Header, Sider, Content } = Layout;
 
@@ -55,6 +57,24 @@ export default function AdminLayout({
       icon: <AuditOutlined />,
       label: '审核管理',
       onClick: () => router.push('/admin/review'),
+    },
+    {
+      key: '/admin/hotels',
+      icon: <ShopOutlined />,
+      label: '酒店管理',
+      onClick: () => router.push('/admin/hotels'),
+    },
+    {
+      key: '/admin/locations',
+      icon: <EnvironmentOutlined />,
+      label: '城市位置',
+      onClick: () => router.push('/admin/locations'),
+    },
+    {
+      key: '/admin/tags',
+      icon: <TagsOutlined />,
+      label: '标签管理',
+      onClick: () => router.push('/admin/tags'),
     },
   ];
 
@@ -114,7 +134,6 @@ export default function AdminLayout({
             管理员系统
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <ThemeToggle />
             <Dropdown menu={{ items: userMenuItems }}>
               <div
                 style={{
@@ -125,7 +144,7 @@ export default function AdminLayout({
                 }}
               >
                 <Avatar icon={<UserOutlined />} />
-                <span>{user?.username}</span>
+                <span>{user?.name}</span>
               </div>
             </Dropdown>
           </div>
