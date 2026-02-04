@@ -1,6 +1,6 @@
 .register-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #0066FF 0%, #4A90E2 100%);
   padding: 80rpx 40rpx;
 }
 
@@ -50,6 +50,7 @@
   padding: 0 24rpx;
   font-size: 28rpx;
   color: #333333;
+  box-sizing: border-box;
 }
 
 .input-placeholder {
@@ -59,7 +60,7 @@
 .register-btn {
   width: 100%;
   height: 88rpx;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #0066FF 0%, #4A90E2 100%);
   border-radius: 44rpx;
   font-size: 32rpx;
   color: #ffffff;
@@ -88,7 +89,7 @@
 
 .login-link {
   font-size: 26rpx;
-  color: #f5576c;
+  color: #0066FF;
   font-weight: bold;
   margin-left: 8rpx;
 }

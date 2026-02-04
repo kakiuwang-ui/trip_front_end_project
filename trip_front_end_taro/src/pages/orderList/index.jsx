@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { usePullDownRefresh } from '@tarojs/taro';
 import { getMyBookings, cancelBooking } from '../../services/booking';
 import { formatDate, formatPrice } from '../../utils/format';
 import { storage } from '../../utils/storage';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import EmptyState from '../../components/EmptyState';
 import './index.css';
 
 function OrderList() {
@@ -122,6 +124,12 @@ function OrderList() {
     });
   };
 
+  // 下拉刷新
+  usePullDownRefresh(async () => {
+    await loadOrders();
+    Taro.stopPullDownRefresh();
+  });
+
   // 根据状态筛选订单
   const filteredOrders = orders.filter(order => {
     if (activeTab === 'all') return true;
@@ -161,9 +169,7 @@ function OrderList() {
       {/* 订单列表 */}
       <ScrollView scrollY className='order-scroll'>
         {loading ? (
-          <View className='loading-container'>
-            <Text className='loading-text'>加载中...</Text>
-          </View>
+          <LoadingSpinner text='加载订单中...' />
         ) : filteredOrders.length > 0 ? (
           filteredOrders.map((order) => (
             <View key={order.id} className='order-card'>
@@ -233,11 +239,13 @@ function OrderList() {
             </View>
           ))
         ) : (
-          <View className='empty-container'>
-            <Text className='empty-icon'>📋</Text>
-            <Text className='empty-text'>暂无订单</Text>
-            <Text className='empty-tips'>快去预订心仪的酒店吧~</Text>
-          </View>
+          <EmptyState
+            image='📋'
+            title='暂无订单'
+            description='快去预订心仪的酒店吧~'
+            buttonText='去预订'
+            onButtonClick={() => Taro.switchTab({ url: '/pages/home/index' })}
+          />
         )}
       </ScrollView>
     </View>

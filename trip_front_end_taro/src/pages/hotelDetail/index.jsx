@@ -7,6 +7,8 @@ import { createBooking } from '../../services/booking';
 import { formatPrice, formatStars } from '../../utils/format';
 import { storage } from '../../utils/storage';
 import Calendar from '../../components/Calendar';
+import BookingConfirm from '../../components/BookingConfirm';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import './index.css';
 
 function HotelDetail() {
@@ -27,6 +29,7 @@ function HotelDetail() {
   const [startDate, setStartDate] = useState(checkIn || dayjs().format('YYYY-MM-DD'));
   const [endDate, setEndDate] = useState(checkOut || dayjs().add(1, 'day').format('YYYY-MM-DD'));
   const [selectedRoomTypeId, setSelectedRoomTypeId] = useState(null);
+  const [showBookingConfirm, setShowBookingConfirm] = useState(false);
 
   // 加载酒店详情和房型数据
   useEffect(() => {
@@ -224,47 +227,65 @@ function HotelDetail() {
       return;
     }
 
-    // 确认预订
-    Taro.showModal({
-      title: '确认预订',
-      content: `${hotel?.name}\n${startDate} - ${endDate}\n共${getNightCount()}晚`,
-      success: async (res) => {
-        if (res.confirm) {
-          try {
-            const selectedRoom = roomTypes.find(r => r.id === selectedRoomTypeId);
-            const totalPrice = (selectedRoom?.price || 0) * getNightCount();
+    // 显示预订确认弹窗
+    setShowBookingConfirm(true);
+  };
 
-            const bookingData = {
-              hotelId: hotel.id,
-              roomTypeId: selectedRoomTypeId,
-              checkInDate: startDate,
-              checkOutDate: endDate,
-              guestCount: 1,
-              totalPrice: totalPrice,
-              specialRequests: ''
-            };
+  // 确认预订
+  const handleConfirmBooking = async (guestInfo) => {
+    // 验证表单
+    if (!guestInfo.guestName.trim()) {
+      Taro.showToast({
+        title: '请填写入住人姓名',
+        icon: 'none'
+      });
+      return;
+    }
 
-            const result = await createBooking(bookingData);
+    if (!guestInfo.guestPhone.trim()) {
+      Taro.showToast({
+        title: '请填写联系电话',
+        icon: 'none'
+      });
+      return;
+    }
 
-            if (result.success) {
-              Taro.showToast({
-                title: '预订成功',
-                icon: 'success'
-              });
-              setTimeout(() => {
-                Taro.navigateTo({ url: '/pages/orderList/index' });
-              }, 1500);
-            }
-          } catch (error) {
-            console.error('预订失败:', error);
-            Taro.showToast({
-              title: '预订失败，请重试',
-              icon: 'none'
-            });
-          }
-        }
+    try {
+      const selectedRoom = roomTypes.find(r => r.id === selectedRoomTypeId);
+      const totalPrice = (selectedRoom?.price || 0) * getNightCount();
+
+      const bookingData = {
+        hotelId: hotel.id,
+        roomTypeId: selectedRoomTypeId,
+        checkInDate: startDate,
+        checkOutDate: endDate,
+        guestCount: guestInfo.guestCount,
+        totalPrice: totalPrice,
+        specialRequests: guestInfo.specialRequests || '',
+        guestName: guestInfo.guestName,
+        guestPhone: guestInfo.guestPhone,
+        arrivalTime: guestInfo.arrivalTime
+      };
+
+      const result = await createBooking(bookingData);
+
+      if (result.success) {
+        setShowBookingConfirm(false);
+        Taro.showToast({
+          title: '预订成功',
+          icon: 'success'
+        });
+        setTimeout(() => {
+          Taro.navigateTo({ url: '/pages/orderList/index' });
+        }, 1500);
       }
-    });
+    } catch (error) {
+      console.error('预订失败:', error);
+      Taro.showToast({
+        title: error.message || '预订失败，请重试',
+        icon: 'none'
+      });
+    }
   };
 
   const getNightCount = useCallback(() => {
@@ -303,9 +324,7 @@ function HotelDetail() {
   if (loading) {
     return (
       <View className='detail-page-container'>
-        <View style={{ padding: '100rpx', textAlign: 'center' }}>
-          <Text>加载中...</Text>
-        </View>
+        <LoadingSpinner text='加载中...' fullScreen />
       </View>
     );
   }
@@ -532,6 +551,19 @@ function HotelDetail() {
           mode="range"
         />
       )}
+
+      {/* 预订确认弹窗 */}
+      <BookingConfirm
+        visible={showBookingConfirm}
+        hotel={hotel}
+        room={roomTypes.find(r => r.id === selectedRoomTypeId)}
+        checkIn={dayjs(startDate).format('M月D日')}
+        checkOut={dayjs(endDate).format('M月D日')}
+        nights={getNightCount()}
+        totalPrice={(roomTypes.find(r => r.id === selectedRoomTypeId)?.price || 0) * getNightCount()}
+        onClose={() => setShowBookingConfirm(false)}
+        onConfirm={handleConfirmBooking}
+      />
     </View>
   );
 }

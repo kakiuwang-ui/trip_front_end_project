@@ -1,0 +1,117 @@
+/* 筛选面板遮罩 */
+.filter-panel-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+}
+
+/* 筛选面板内容 */
+.filter-panel-content {
+  width: 100%;
+  max-height: 80vh;
+  background: #fff;
+  border-radius: 24px 24px 0 0;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* 标题栏 */
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32px 32px 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.filter-title {
+  font-size: 36px;
+  font-weight: 600;
+  color: #333;
+}
+
+.filter-reset {
+  font-size: 28px;
+  color: #0066FF;
+}
+
+/* 筛选区块 */
+.filter-section {
+  padding: 32px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.filter-section-title {
+  font-size: 30px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 24px;
+  display: block;
+}
+
+/* 筛选选项 */
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.filter-option {
+  padding: 16px 32px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  font-size: 28px;
+  color: #666;
+  transition: all 0.3s;
+}
+
+.filter-option.active {
+  background: #E6F2FF;
+  color: #0066FF;
+  border: 1px solid #0066FF;
+}
+
+/* 底部按钮 */
+.filter-footer {
+  display: flex;
+  gap: 24px;
+  padding: 24px 32px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  background: #fff;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.filter-btn {
+  flex: 1;
+  height: 88px;
+  border-radius: 8px;
+  font-size: 32px;
+  line-height: 88px;
+  text-align: center;
+  border: none;
+}
+
+.filter-btn.cancel {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.filter-btn.confirm {
+  background: #0066FF;
+  color: #fff;
+}
