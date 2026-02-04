@@ -1,0 +1,334 @@
+/* pages/home/index.css */
+
+.home-page-container {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+/* 顶部轮播图区域 */
+.top-banner-box {
+  position: relative;
+  height: 320rpx;
+  background-color: #fff;
+}
+
+.banner-swiper {
+  width: 100%;
+  height: 320rpx;
+}
+
+.banner-img {
+  width: 100%;
+  height: 320rpx;
+  border-radius: 0;
+}
+
+.banner-tag {
+  position: absolute;
+  bottom: 20rpx;
+  right: 20rpx;
+  padding: 6rpx 16rpx;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 22rpx;
+  border-radius: 20rpx;
+}
+
+/* 搜索卡片主体 */
+.search-main-card {
+  margin: -60rpx 30rpx 30rpx;
+  padding: 40rpx 30rpx;
+  background-color: #fff;
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.06);
+}
+
+/* 标签切换 */
+.tabs-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+.tab-item-box {
+  flex: 1;
+  text-align: center;
+  padding-bottom: 20rpx;
+  position: relative;
+}
+
+.tab-item-box.active {
+  font-weight: 600;
+}
+
+.tab-text-val {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+  display: block;
+}
+
+.tab-item-box.active .tab-text-val {
+  color: #1677ff;
+  font-weight: 600;
+}
+
+.tab-active-line {
+  position: absolute;
+  bottom: -2rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60rpx;
+  height: 4rpx;
+  background-color: #1677ff;
+  border-radius: 4rpx;
+}
+
+/* 通用行样式 */
+.row-section {
+  margin-bottom: 30rpx;
+}
+
+/* 城市选择+搜索输入行 */
+.city-search-row {
+  display: flex;
+  align-items: center;
+  background-color: #f8f9fa;
+  border-radius: 16rpx;
+  padding: 20rpx;
+}
+
+.city-wrap-box {
+  display: flex;
+  align-items: center;
+  padding-right: 20rpx;
+  border-right: 2rpx solid #e8e8e8;
+}
+
+.city-label-text {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+  margin-right: 10rpx;
+}
+
+.triangle-down-icon {
+  width: 0;
+  height: 0;
+  border-left: 8rpx solid transparent;
+  border-right: 8rpx solid transparent;
+  border-top: 12rpx solid #666;
+}
+
+.input-wrap-box {
+  flex: 1;
+  padding: 0 20rpx;
+}
+
+.search-input-el {
+  width: 100%;
+  font-size: 28rpx;
+  color: #333;
+  height: 40rpx;
+  line-height: 40rpx;
+}
+
+.gps-location-box {
+  padding-left: 20rpx;
+  border-left: 2rpx solid #e8e8e8;
+}
+
+.gps-circle-icon {
+  width: 40rpx;
+  height: 40rpx;
+  background-color: #1677ff;
+  border-radius: 50%;
+  position: relative;
+}
+
+.gps-circle-icon::after {
+  content: "";
+  position: absolute;
+  top: 10rpx;
+  left: 10rpx;
+  width: 20rpx;
+  height: 20rpx;
+  background-color: #fff;
+  border-radius: 50%;
+}
+
+/* 日期选择行 */
+.date-select-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8f9fa;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  cursor: pointer;
+}
+
+.date-left-info {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.date-single-info {
+  flex: 1;
+}
+
+.date-item-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.date-val-num {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.date-desc-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.date-divider-line {
+  width: 2rpx;
+  height: 40rpx;
+  background-color: #ddd;
+  margin: 0 40rpx;
+}
+
+.night-count-total {
+  font-size: 28rpx;
+  color: #1677ff;
+  font-weight: 500;
+  background-color: #e6f4ff;
+  padding: 10rpx 20rpx;
+  border-radius: 8rpx;
+}
+
+/* 凌晨提示条 */
+.night-notice-bar {
+  background-color: #fff7e6;
+  border: 1rpx solid #ffd591;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  display: flex;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.moon-icon-fix {
+  font-size: 32rpx;
+  margin-right: 12rpx;
+}
+
+.notice-content-text {
+  font-size: 24rpx;
+  color: #d46b08;
+  line-height: 1.4;
+  flex: 1;
+}
+
+/* 价格/星级筛选 */
+.price-filter-row {
+  background-color: #f8f9fa;
+  border-radius: 16rpx;
+  padding: 24rpx;
+}
+
+.placeholder-light-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 快速标签 */
+.quick-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-bottom: 40rpx;
+}
+
+.tag-bubble-item {
+  padding: 12rpx 24rpx;
+  background-color: #f0f0f0;
+  border-radius: 24rpx;
+  font-size: 24rpx;
+  color: #666;
+  white-space: nowrap;
+}
+
+.tag-bubble-item:first-child {
+  background-color: #e6f4ff;
+  color: #1677ff;
+}
+
+/* 查询按钮 */
+.submit-search-btn {
+  width: 100%;
+  height: 88rpx;
+  line-height: 88rpx;
+  background-color: #1677ff;
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 500;
+  border-radius: 16rpx;
+  border: none;
+  margin-top: 10rpx;
+}
+
+.submit-search-btn:active {
+  background-color: #0958d9;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .search-main-card {
+    margin-left: 20rpx;
+    margin-right: 20rpx;
+    padding: 30rpx 20rpx;
+  }
+  
+  .city-search-row {
+    padding: 16rpx;
+  }
+  
+  .date-select-row {
+    padding: 20rpx;
+  }
+  
+  .date-divider-line {
+    margin: 0 20rpx;
+  }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-main-card {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* 加载状态 */
+.date-select-row:active {
+  background-color: #f0f0f0;
+  transform: scale(0.99);
+  transition: all 0.1s ease;
+}
