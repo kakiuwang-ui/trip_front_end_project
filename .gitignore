@@ -42,3 +42,7 @@ next-env.d.ts
 
 /app/generated/prisma
 .claude/
+
+# Taro build output
+trip_front_end_taro/dist/
+trip_front_end_taro/node_modules/

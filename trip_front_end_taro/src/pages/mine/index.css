@@ -1,0 +1,143 @@
+/* 全局背景 */
+.mine-container {
+  background-color: #f7f8fa;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 用户部头部 */
+.user-header-box {
+  background-color: #007aff;
+  height: 320rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 40rpx;
+  padding-top: 40rpx;
+  box-sizing: border-box;
+}
+
+.avatar-placeholder-circle {
+  width: 120rpx;
+  height: 120rpx;
+  background-color: #e0e0e0;
+  border: 4rpx solid #ffffff;
+  border-radius: 60rpx;
+  display: block;
+}
+
+.user-text-info {
+  margin-left: 30rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name-title {
+  color: #ffffff;
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.user-sub-status {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 24rpx;
+  margin-top: 10rpx;
+}
+
+/* 横向导航卡片 */
+.mine-nav-row {
+  background-color: #ffffff;
+  margin: -60rpx 30rpx 0;
+  border-radius: 16rpx;
+  display: flex;
+  justify-content: space-around;
+  padding: 30rpx 0;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 5;
+  box-sizing: border-box;
+}
+
+.nav-menu-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.nav-val-num {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333333;
+}
+
+.nav-label-text {
+  font-size: 24rpx;
+  color: #666666;
+  margin-top: 10rpx;
+}
+
+/* 按钮组 */
+.auth-action-group {
+  margin: 40rpx 30rpx;
+}
+
+.mine-btn-login {
+  background-color: #007aff;
+  color: #ffffff;
+  border-radius: 10rpx;
+  font-size: 32rpx;
+  height: 90rpx;
+  line-height: 90rpx;
+  margin-bottom: 20rpx;
+  border: none;
+  padding: 0;
+}
+
+.mine-btn-register {
+  background-color: #ffffff;
+  color: #007aff;
+  border: 2rpx solid #007aff;
+  border-radius: 10rpx;
+  font-size: 32rpx;
+  height: 90rpx;
+  line-height: 90rpx;
+  padding: 0;
+}
+/* 消除小程序Button原生默认边框/阴影 */
+.mine-btn-login::after,
+.mine-btn-register::after {
+  border: none;
+}
+
+/* 功能列表项 */
+.common-list-section {
+  background-color: #ffffff;
+  margin: 30rpx 30rpx;
+  border-radius: 16rpx;
+  padding: 0 30rpx;
+  box-sizing: border-box;
+}
+
+.list-cell-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100rpx;
+  border-bottom: 1rpx solid #f2f2f2;
+  box-sizing: border-box;
+}
+
+.list-cell-row.no-border {
+  border-bottom: none;
+}
+
+.cell-left-text {
+  font-size: 30rpx;
+  color: #333333;
+}
+
+.cell-arrow-right {
+  font-size: 28rpx;
+  color: #cccccc;
+}

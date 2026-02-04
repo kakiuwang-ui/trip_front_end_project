@@ -1,0 +1,461 @@
+/* src/pages/detail/index.css - 完整样式 */
+
+/* 全局容器 */
+.detail-page-container {
+  background-color: #f7f8fa;
+  min-height: 100vh;
+  padding-bottom: 150rpx; /* 为悬浮底部操作栏腾出空间 */
+  position: relative;
+}
+
+.scroll-content {
+  height: 100vh;
+  overflow-y: scroll;
+}
+
+/* 1.顶部导航栏 (需要配合实现滚动变色) */
+.detail-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 80rpx; /* 修正 */
+  background-color: rgba(255, 255, 255, 0.0); /* 初始透明，控制 */
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30rpx;
+  padding-top: 40rpx; /* 留出手机状态栏高度 */
+  box-sizing: content-box; /* 确保高度不受影响 */
+}
+
+.header-back {
+  font-size: 40rpx;
+  color: #fff; /* 初始白色 */
+}
+
+.header-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  opacity: 0; /* 初始隐藏 */
+}
+
+.header-action-group {
+  display: flex;
+  align-items: center;
+}
+
+.header-collect {
+  font-size: 24rpx;
+  color: #fff; /* 初始白色 */
+}
+
+/* 2.媒体区域 */
+.media-box {
+  position: relative;
+  width: 100%;
+  height: 500rpx;
+}
+.main-media-img {
+  width: 100%;
+  height: 100%;
+}
+
+.media-tags-row {
+  position: absolute;
+  top: 20rpx;
+  left: 20rpx;
+  display: flex;
+}
+
+.media-tag {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 20rpx;
+  padding: 6rpx 14rpx;
+  border-radius: 6rpx;
+  margin-right: 10rpx;
+}
+
+.preview-icon { /* 播放图标 */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80rpx;
+  height: 80rpx;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-size: 30rpx;
+}
+
+.tag-sq-btn { /* 口碑标签 */
+  position: absolute;
+  top: 30rpx;
+  right: 90rpx;
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 6rpx 16rpx;
+  font-size: 22rpx;
+  color: #c06c00;
+  font-weight: bold;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+/* 3.核心信息卡片 (白卡) */
+.info-card {
+  position: relative;
+  margin-top: -80rpx; /* 浮动效果 */
+  margin-left: 24rpx;
+  margin-right: 24rpx;
+  background-color: #ffffff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+  z-index: 100;
+}
+
+.info-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10rpx;
+}
+
+.hotel-name {
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.hotel-stars {
+  color: #ff9a03;
+  font-size: 24rpx;
+}
+
+.hotel-rank-tag {
+  font-size: 22rpx;
+  color: #999;
+  margin-bottom: 20rpx;
+}
+
+/* 设施图标行 */
+.facility-icon-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30rpx;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.facility-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 30rpx;
+  min-width: 80rpx;
+}
+
+.icon-placeholder {
+  font-size: 28rpx;
+  color: #007aff;
+  margin-bottom: 6rpx;
+}
+
+.facility-text {
+  font-size: 20rpx;
+  color: #666;
+  white-space: nowrap;
+}
+
+.shortcut-arrow {
+  font-size: 24rpx;
+  color: #999;
+  margin-left: 10rpx;
+}
+
+/* 评分与地址分栏 */
+.info-detail-cols {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 30rpx;
+}
+
+.col-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.score-badge {
+  background-color: #007aff;
+  color: #fff;
+  font-size: 24rpx;
+  padding: 2rpx 8rpx;
+  border-radius: 6rpx;
+  font-weight: bold;
+}
+
+.score-desc {
+  font-size: 24rpx;
+  color: #007aff;
+  margin-top: 5rpx;
+}
+
+.recommendation-text {
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 10rpx;
+}
+
+.col-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  width: 40%;
+}
+
+.distance-text {
+  font-size: 24rpx;
+  color: #333;
+  text-align: right;
+}
+
+.address-text {
+  font-size: 20rpx;
+  color: #999;
+  margin-top: 5rpx;
+  text-align: right;
+}
+
+.map-icon-small {
+  background-color: #f0f0f0;
+  border-radius: 50%;
+  width: 30rpx;
+  height: 30rpx;
+  font-size: 18rpx;
+  text-align: center;
+  line-height: 30rpx;
+  margin-top: 10rpx;
+  color: #666;
+}
+
+.info-card-separator {
+  width: 100%;
+  height: 1rpx;
+  background-color: #f2f2f2;
+  margin: 30rpx 0;
+}
+
+/* 日期信息行 (复用首页样式) */
+.date-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  background-color: #f7f7f7;
+  border-radius: 8rpx;
+  margin: 20rpx 0;
+}
+
+.date-left-info {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+}
+
+.date-item-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.date-val-num {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.date-desc-text {
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 4rpx;
+}
+
+.date-divider-line {
+  width: 30rpx;
+  height: 2rpx;
+  background-color: #ccc;
+  margin: 0 20rpx;
+}
+
+.night-count-total {
+  font-size: 26rpx;
+  color: #1890ff;
+  background-color: #e6f7ff;
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  margin: 0 20rpx;
+}
+
+.date-change-arrow {
+  font-size: 28rpx;
+  color: #999;
+  margin-right: 10rpx;
+}
+
+/* 7.快捷筛选条件 */
+.quick-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  padding-bottom: 30rpx;
+  align-items: center;
+}
+
+.quick-filter-tag {
+  background-color: #f5f7f9;
+  padding: 8rpx 20rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  margin-right: 15rpx;
+  margin-bottom: 15rpx;
+  color: #333;
+}
+
+.more-filter {
+  font-size: 24rpx;
+  color: #999;
+  margin-left: auto;
+}
+
+/* 4.房型列表 */
+.room-type-section {
+  background-color: #fff;
+  margin: 20rpx 24rpx 0;
+  border-radius: 20rpx;
+  padding: 0 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+}
+
+.room-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 30rpx 0;
+  border-bottom: 1rpx solid #f2f2f2;
+}
+
+.room-header-title {
+  font-size: 30rpx;
+  font-weight: bold;
+}
+
+.collapse-icon {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.room-preview-row {
+  display: flex;
+  padding: 0 30rpx;
+  padding-bottom: 30rpx;
+}
+
+.room-preview-img {
+  width: 180rpx;
+  height: 180rpx;
+  border-radius: 12rpx;
+  margin-right: 20rpx;
+}
+
+.room-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+
+.room-specs {
+  font-size: 22rpx;
+  color: #666;
+  margin-top: 10rpx;
+  line-height: 1.4;
+}
+
+/* 5.底部悬浮操作栏 (Sticky Footer) - 更新匹配截图 */
+.sticky-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 130rpx;
+  background-color: #ffffff;
+  border-top: 1rpx solid #f2f2f2;
+  display: flex;
+  align-items: center;
+  padding: 0 30rpx;
+  z-index: 200;
+}
+
+.footer-left-chat {
+  width: 40rpx;
+  height: 90rpx;
+  margin-right: 20rpx;
+}
+
+.chat-icon {
+  background-color: #f9f9f9;
+  border-radius: 50%;
+  width: 60rpx;
+  height: 60rpx;
+  font-size: 22rpx;
+  text-align: center;
+  line-height: 60rpx;
+  color: #666;
+  border: 1rpx solid #eee;
+}
+
+.footer-price-area {
+  display: flex;
+  align-items: baseline;
+  flex: 1; /* 占据剩余空间 */
+}
+
+.footer-price-symbol {
+  font-size: 24rpx;
+  color: #333;
+}
+
+.footer-price-val {
+  font-size: 44rpx;
+  font-weight: bold;
+  color: #ff5500;
+  margin: 0 4rpx;
+}
+
+.footer-price-unit {
+  font-size: 22rpx;
+  color: #999;
+  margin-left: 5rpx;
+}
+
+/* 按钮：对应截图中的"立即预订" */
+.footer-action-btn {
+  background-color: #007aff;
+  color: #ffffff;
+  border-radius: 50rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+  width: 280rpx; /* 适配右侧预订按钮的宽度 */
+  height: 80rpx;
+  line-height: 80rpx;
+  border: none;
+  text-align: center;
+  margin-left: 20rpx;
+}
