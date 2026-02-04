@@ -70,24 +70,32 @@ export async function PUT(
     }
     const userId = authResult.user.userId;
 
-    // 1. 获取订单校验权限
+    // 1. 获取订单校验权限 - 需要包含酒店信息以检查商户权限
     const booking = await prisma.booking.findUnique({
-      where: { id: bookingId }
+      where: { id: bookingId },
+      include: { hotel: true }
     });
 
     if (!booking) {
       return NextResponse.json({ success: false, error: '订单不存在' }, { status: 404 });
     }
 
-    if (booking.userId !== userId) {
+    const isUser = booking.userId === userId;
+    const isMerchant = booking.hotel?.merchantId === userId;
+
+    if (!isUser && !isMerchant) {
       return NextResponse.json({ success: false, error: '无权操作此订单' }, { status: 403 });
     }
 
     const body = await request.json();
     const { guestInfo, status } = body;
 
-    // 2. 如果是取消订单，需要释放库存
-    if (status === 'cancelled' && booking.status !== 'cancelled') {
+    // 2. 处理取消订单 (用户和商户均可)
+    if (status === 'cancelled') {
+        if (booking.status === 'cancelled') {
+           return NextResponse.json({ success: true, message: '订单已取消' });
+        }
+
         // 开启事务释放库存
         await prisma.$transaction(async (tx) => {
             await tx.booking.update({
@@ -96,33 +104,42 @@ export async function PUT(
             });
 
             // 归还库存
-            let currentDate = new Date(booking.checkInDate);
-            const end = new Date(booking.checkOutDate);
+            if (booking.roomTypeId) {
+                let currentDate = new Date(booking.checkInDate);
+                const end = new Date(booking.checkOutDate);
 
-            while (currentDate < end) {
-                const dateKey = new Date(currentDate);
-                // 减少 booked 计数
-                await tx.roomAvailability.updateMany({
-                   where: {
-                       roomTypeId: booking.roomTypeId!,
-                       date: dateKey
-                   },
-                   data: {
-                       booked: { decrement: 1 }
-                   } 
-                });
-                currentDate.setDate(currentDate.getDate() + 1);
+                while (currentDate < end) {
+                    const dateKey = new Date(currentDate);
+                    // 减少 booked 计数
+                    await tx.roomAvailability.updateMany({
+                    where: {
+                        roomTypeId: booking.roomTypeId!,
+                        date: dateKey
+                    },
+                    data: {
+                        booked: { decrement: 1 }
+                    } 
+                    });
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
             }
         });
         return NextResponse.json({ success: true, message: '订单已取消' });
     }
 
-    // 普通更新 (如 guestInfo)
+    // 3. 处理其他更新 (仅商户可操作)
+    if (!isMerchant) {
+        return NextResponse.json({ success: false, error: '只有商户可以修改订单信息' }, { status: 403 });
+    }
+
+    // 普通更新 (如 guestInfo 或其他状态)
+    const updateData: any = {};
+    if (guestInfo) updateData.guestInfo = guestInfo;
+    if (status) updateData.status = status;
+
     const updatedBooking = await prisma.booking.update({
         where: { id: bookingId },
-        data: {
-            guestInfo: guestInfo ?? booking.guestInfo,
-        }
+        data: updateData
     });
 
     return NextResponse.json({ success: true, data: updatedBooking });
@@ -146,14 +163,18 @@ export async function DELETE(
     const userId = authResult.user.userId;
 
     const booking = await prisma.booking.findUnique({
-      where: { id: bookingId }
+      where: { id: bookingId },
+      include: { hotel: true }
     });
 
     if (!booking) {
       return NextResponse.json({ success: false, error: '订单不存在' }, { status: 404 });
     }
 
-    if (booking.userId !== userId) {
+    const isUser = booking.userId === userId;
+    const isMerchant = booking.hotel?.merchantId === userId;
+
+    if (!isUser && !isMerchant) {
       return NextResponse.json({ success: false, error: '无权操作此订单' }, { status: 403 });
     }
 
