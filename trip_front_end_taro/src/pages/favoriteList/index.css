@@ -1,0 +1,157 @@
+.favorite-page-container {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding-bottom: 40rpx;
+}
+
+.favorite-count {
+  background: #fff;
+  padding: 24rpx 32rpx;
+  margin-bottom: 20rpx;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.count-text {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.favorite-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  padding: 0 20rpx;
+}
+
+.favorite-card {
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  display: flex;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.hotel-image {
+  width: 240rpx;
+  height: 180rpx;
+  flex-shrink: 0;
+}
+
+.hotel-info {
+  flex: 1;
+  padding: 20rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.name-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12rpx;
+}
+
+.hotel-name {
+  flex: 1;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.hotel-stars {
+  font-size: 24rpx;
+  color: #FF9800;
+  flex-shrink: 0;
+}
+
+.score-row {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.score-badge {
+  background: linear-gradient(135deg, #0066FF 0%, #4A90E2 100%);
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: 600;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+}
+
+.score-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.hotel-address {
+  font-size: 24rpx;
+  color: #999;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.price-box {
+  display: flex;
+  align-items: baseline;
+}
+
+.price-symbol {
+  font-size: 24rpx;
+  color: #FF6B00;
+  margin-right: 4rpx;
+}
+
+.price-value {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #FF6B00;
+}
+
+.price-unit {
+  font-size: 24rpx;
+  color: #FF6B00;
+  margin-left: 4rpx;
+}
+
+.favorite-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 20rpx;
+  background: #f5f5f5;
+  border-radius: 40rpx;
+}
+
+.favorite-btn.active {
+  background: #ffe5e5;
+}
+
+.favorite-icon {
+  font-size: 28rpx;
+}
+
+.favorite-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.favorite-btn.active .favorite-text {
+  color: #FF6B00;
+}

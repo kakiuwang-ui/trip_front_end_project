@@ -240,6 +240,13 @@ function HotelList() {
     Taro.navigateBack();
   };
 
+  // 打开地图
+  const handleOpenMap = () => {
+    Taro.navigateTo({
+      url: `/pages/hotelMap/index?params=${encodeURIComponent(JSON.stringify(searchParams))}`
+    });
+  };
+
   return (
     <View className='list-page-container'>
       {/* 顶部搜索条 */}
@@ -264,7 +271,7 @@ function HotelList() {
             />
           </View>
         </View>
-        <View className='map-entry-box'>
+        <View className='map-entry-box' onClick={handleOpenMap}>
           <View className='map-icon-dot'></View>
           <Text className='map-text-small'>地图</Text>
         </View>

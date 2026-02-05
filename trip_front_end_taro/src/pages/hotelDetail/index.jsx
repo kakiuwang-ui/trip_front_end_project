@@ -4,6 +4,7 @@ import Taro, { useRouter } from '@tarojs/taro';
 import dayjs from 'dayjs';
 import { getHotelById, getHotelRoomTypes } from '../../services/hotel';
 import { createBooking } from '../../services/booking';
+import { addFavorite, removeFavorite, checkFavorite } from '../../services/favorite';
 import { formatPrice, formatStars } from '../../utils/format';
 import { storage } from '../../utils/storage';
 import Calendar from '../../components/Calendar';
@@ -30,11 +31,13 @@ function HotelDetail() {
   const [endDate, setEndDate] = useState(checkOut || dayjs().add(1, 'day').format('YYYY-MM-DD'));
   const [selectedRoomTypeId, setSelectedRoomTypeId] = useState(null);
   const [showBookingConfirm, setShowBookingConfirm] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   // 加载酒店详情和房型数据
   useEffect(() => {
     if (hotelId) {
       loadHotelDetail();
+      checkHotelFavorite();
     }
   }, [hotelId]);
 
@@ -159,12 +162,38 @@ function HotelDetail() {
     setShowHeaderTitle(scrollTop > 100);
   };
 
-  const handleCollect = () => {
-    Taro.showToast({
-      title: '收藏成功',
-      icon: 'success',
-      duration: 1500
-    });
+  // 检查酒店是否已收藏
+  const checkHotelFavorite = async () => {
+    try {
+      const res = await checkFavorite(hotelId);
+      if (res.success) {
+        setIsFavorite(res.data?.isFavorite || false);
+      }
+    } catch (error) {
+      console.error('❌ 检查收藏状态失败:', error);
+    }
+  };
+
+  // 切换收藏状态
+  const handleCollect = async () => {
+    try {
+      if (isFavorite) {
+        const res = await removeFavorite(hotelId);
+        if (res.success) {
+          setIsFavorite(false);
+          Taro.showToast({ title: '已取消收藏', icon: 'success', duration: 1500 });
+        }
+      } else {
+        const res = await addFavorite(hotelId);
+        if (res.success) {
+          setIsFavorite(true);
+          Taro.showToast({ title: '收藏成功', icon: 'success', duration: 1500 });
+        }
+      }
+    } catch (error) {
+      console.error('❌ 收藏操作失败:', error);
+      Taro.showToast({ title: '操作失败，请重试', icon: 'none' });
+    }
   };
 
   const handleMapClick = () => {
@@ -372,7 +401,7 @@ function HotelDetail() {
             onClick={handleCollect}
             style={{ color: headerOpacity > 0.5 ? '#333' : '#fff' }}
           >
-            🤍 收藏
+            {isFavorite ? '❤️' : '🤍'} {isFavorite ? '已收藏' : '收藏'}
           </Text>
         </View>
       </View>

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Button } from '@tarojs/components';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { logout } from '../../services/auth';
+import { getMyFavorites } from '../../services/favorite';
+import { getMyBookings } from '../../services/booking';
 import { storage } from '../../utils/storage';
 import './index.css';
 
@@ -9,6 +11,10 @@ function Mine() {
   // 登录状态和用户信息
   const [isLogin, setIsLogin] = useState(false);
   const [user, setUser] = useState(null);
+
+  // 统计数据
+  const [favoriteCount, setFavoriteCount] = useState(0);
+  const [orderCount, setOrderCount] = useState(0);
 
   // 检查登录状态（首次加载）
   useEffect(() => {
@@ -18,6 +24,9 @@ function Mine() {
   // 监听页面显示（从登录页返回时刷新状态）
   useDidShow(() => {
     checkAuth();
+    if (storage.isAuthenticated()) {
+      loadUserStats();
+    }
   });
 
   // 检查认证状态
@@ -28,6 +37,29 @@ function Mine() {
     if (loggedIn) {
       const userInfo = storage.getUser();
       setUser(userInfo);
+    } else {
+      setFavoriteCount(0);
+      setOrderCount(0);
+    }
+  };
+
+  // 加载用户统计数据
+  const loadUserStats = async () => {
+    try {
+      const [favoritesRes, bookingsRes] = await Promise.all([
+        getMyFavorites(),
+        getMyBookings()
+      ]);
+
+      if (favoritesRes.success && favoritesRes.data) {
+        setFavoriteCount(favoritesRes.data.length);
+      }
+
+      if (bookingsRes.success && bookingsRes.data) {
+        setOrderCount(bookingsRes.data.length);
+      }
+    } catch (error) {
+      console.error('❌ 加载用户统计数据失败:', error);
     }
   };
 
@@ -39,6 +71,18 @@ function Mine() {
   // 处理注册按钮点击
   const handleRegister = () => {
     Taro.navigateTo({ url: '/pages/register/index' });
+  };
+
+  // 处理我的收藏点击
+  const handleMyFavorites = () => {
+    if (!isLogin) {
+      Taro.showToast({ title: '请先登录', icon: 'none' });
+      setTimeout(() => {
+        Taro.navigateTo({ url: '/pages/login/index' });
+      }, 1500);
+      return;
+    }
+    Taro.navigateTo({ url: '/pages/favoriteList/index' });
   };
 
   // 处理退出登录
@@ -82,12 +126,12 @@ function Mine() {
 
 {/* 2.横向导航菜单 (收藏、订单、积分、优惠券) */}
 <View className='mine-nav-row'>
-<View className='nav-menu-item'>
-<Text className='nav-val-num'>0</Text>
+<View className='nav-menu-item' onClick={handleMyFavorites}>
+<Text className='nav-val-num'>{favoriteCount}</Text>
 <Text className='nav-label-text'>我的收藏</Text>
 </View>
 <View className='nav-menu-item' onClick={handleMyOrders}>
-<Text className='nav-val-num'>0</Text>
+<Text className='nav-val-num'>{orderCount}</Text>
 <Text className='nav-label-text'>我的订单</Text>
 </View>
 <View className='nav-menu-item'>
