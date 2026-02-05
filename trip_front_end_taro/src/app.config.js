@@ -3,6 +3,7 @@ export default {
     'pages/home/index',
     'pages/hotelList/index',
     'pages/hotelDetail/index',
+    'pages/orderDetail/index',
     'pages/orderList/index',
     'pages/login/index',
     'pages/register/index',

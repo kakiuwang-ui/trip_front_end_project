@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, ScrollView } from '@tarojs/components';
+import { View, Text, Image, Input } from '@tarojs/components';
 import Taro, { usePullDownRefresh } from '@tarojs/taro';
 import { getHotels } from '../../services/hotel';
 import { formatStars, formatPrice } from '../../utils/format';
@@ -27,6 +27,8 @@ function HotelList() {
   const [showFilter, setShowFilter] = useState(false);
   // 排序方式
   const [sortBy, setSortBy] = useState('recommend'); // recommend, distance, priceAsc, priceDesc
+  // 搜索关键词（用于列表页实时搜索）
+  const [localSearchKeyword, setLocalSearchKeyword] = useState('');
 
   // 页面加载时获取路由参数并加载酒店数据
   useEffect(() => {
@@ -50,7 +52,7 @@ function HotelList() {
   // 当筛选条件或排序方式改变时，重新过滤和排序
   useEffect(() => {
     filterAndSortHotels();
-  }, [hotelList, filterParams, sortBy]);
+  }, [hotelList, filterParams, sortBy, localSearchKeyword]);
 
   // 加载酒店列表
   const loadHotels = async (params = {}) => {
@@ -109,6 +111,18 @@ function HotelList() {
   const filterAndSortHotels = () => {
     console.log('🔍 开始筛选和排序', { sortBy, filterParams, hotelListLength: hotelList.length });
     let filtered = [...hotelList];
+
+    // 关键词搜索（本地搜索）
+    if (localSearchKeyword && localSearchKeyword.trim()) {
+      const keyword = localSearchKeyword.trim().toLowerCase();
+      const beforeLength = filtered.length;
+      filtered = filtered.filter(h =>
+        h.name.toLowerCase().includes(keyword) ||
+        (h.notice && h.notice.toLowerCase().includes(keyword)) ||
+        h.tags.some(tag => tag.toLowerCase().includes(keyword))
+      );
+      console.log(`🔎 关键词搜索: ${beforeLength} -> ${filtered.length} (${keyword})`);
+    }
 
     // 价格筛选
     if (filterParams.priceRange) {
@@ -241,7 +255,13 @@ function HotelList() {
             <Text className='p-night'>1晚</Text>
           </View>
           <View className='pill-input-box'>
-            <Text className='p-placeholder'>{searchParams.keyword || '位置/品牌/酒店'}</Text>
+            <Input
+              className='p-search-input'
+              placeholder={searchParams.keyword || '位置/品牌/酒店'}
+              placeholderStyle='color:#999;font-size:26rpx;'
+              value={localSearchKeyword}
+              onInput={(e) => setLocalSearchKeyword(e.detail.value)}
+            />
           </View>
         </View>
         <View className='map-entry-box'>

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, Image, Input, Button, Swiper, SwiperItem } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import Calendar from '../../components/Calendar';
+import SearchSuggestion from '../../components/SearchSuggestion';
 import { getLocations } from '../../services/location';
 import { getTags } from '../../services/tag';
 import dayjs from 'dayjs';
@@ -17,6 +18,20 @@ function Home() {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [tags, setTags] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
+
+  // --- 搜索建议相关状态 ---
+  const [showSearchSuggestion, setShowSearchSuggestion] = useState(false);
+  const [searchHistory, setSearchHistory] = useState([]);
+  const [hotSearches] = useState([
+    '上海外滩酒店',
+    '浦东机场附近',
+    '迪士尼度假区',
+    '南京路步行街',
+    '虹桥枢纽',
+    '豫园附近',
+    '陆家嘴金融中心',
+    '新天地商圈'
+  ]);
 
   // --- 日历控制状态 ---
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
@@ -50,6 +65,7 @@ function Home() {
   // 加载位置和标签数据
   useEffect(() => {
     loadInitialData();
+    loadSearchHistory();
   }, []);
 
   // 加载初始数据（位置和标签）
@@ -80,6 +96,67 @@ function Home() {
       // 使用默认数据
       setSelectedLocation({ id: 1, name: '上海' });
     }
+  };
+
+  // 加载搜索历史
+  const loadSearchHistory = () => {
+    try {
+      const history = Taro.getStorageSync('searchHistory') || [];
+      setSearchHistory(history);
+    } catch (error) {
+      console.error('❌ 加载搜索历史失败:', error);
+    }
+  };
+
+  // 保存搜索历史
+  const saveSearchHistory = (keyword) => {
+    if (!keyword || !keyword.trim()) return;
+
+    try {
+      let history = Taro.getStorageSync('searchHistory') || [];
+
+      // 去重：移除已存在的相同关键词
+      history = history.filter(item => item !== keyword);
+
+      // 添加到最前面
+      history.unshift(keyword);
+
+      // 最多保留10条
+      if (history.length > 10) {
+        history = history.slice(0, 10);
+      }
+
+      Taro.setStorageSync('searchHistory', history);
+      setSearchHistory(history);
+    } catch (error) {
+      console.error('❌ 保存搜索历史失败:', error);
+    }
+  };
+
+  // 清空搜索历史
+  const handleClearSearchHistory = () => {
+    Taro.showModal({
+      title: '清空搜索历史',
+      content: '确定要清空所有搜索历史吗？',
+      success: (res) => {
+        if (res.confirm) {
+          try {
+            Taro.removeStorageSync('searchHistory');
+            setSearchHistory([]);
+            Taro.showToast({ title: '已清空', icon: 'success', duration: 1000 });
+          } catch (error) {
+            console.error('❌ 清空搜索历史失败:', error);
+          }
+        }
+      }
+    });
+  };
+
+  // 选择搜索建议
+  const handleSelectSuggestion = (keyword) => {
+    setSearchKeyword(keyword);
+    setShowSearchSuggestion(false);
+    saveSearchHistory(keyword);
   };
 
   // ----------------------- 事件处理函数 -----------------------
@@ -197,18 +274,41 @@ function Home() {
 
   // 查询按钮处理
   const handleSearch = () => {
+    const keyword = searchKeyword.trim();
+
+    // 保存搜索历史
+    if (keyword) {
+      saveSearchHistory(keyword);
+    }
+
     // 构建查询参数
     const params = {
       locationId: selectedLocation?.id,
       checkInDate: startDate,
       checkOutDate: endDate,
-      keyword: searchKeyword.trim()
+      keyword: keyword
     };
+
+    // 关闭搜索建议
+    setShowSearchSuggestion(false);
 
     // 跳转到酒店列表页，传递参数
     Taro.navigateTo({
       url: `/pages/hotelList/index?params=${encodeURIComponent(JSON.stringify(params))}`
     });
+  };
+
+  // 搜索框获得焦点
+  const handleSearchFocus = () => {
+    setShowSearchSuggestion(true);
+  };
+
+  // 搜索框失去焦点
+  const handleSearchBlur = () => {
+    // 延迟关闭，以便点击建议项能被触发
+    setTimeout(() => {
+      setShowSearchSuggestion(false);
+    }, 200);
   };
 
   // ----------------------- 页面渲染 -----------------------
@@ -273,13 +373,23 @@ function Home() {
             </Text>
             <View className='triangle-down-icon'></View>
           </View>
-          <View className='input-wrap-box'>
+          <View className='input-wrap-box' style={{ position: 'relative' }}>
             <Input
               className='search-input-el'
               placeholder='位置/品牌/酒店'
               placeholderStyle='color:#ccc;'
               value={searchKeyword}
               onInput={(e) => setSearchKeyword(e.detail.value)}
+              onFocus={handleSearchFocus}
+              onBlur={handleSearchBlur}
+            />
+            <SearchSuggestion
+              visible={showSearchSuggestion}
+              keyword={searchKeyword}
+              searchHistory={searchHistory}
+              hotSearches={hotSearches}
+              onSelect={handleSelectSuggestion}
+              onClearHistory={handleClearSearchHistory}
             />
           </View>
           <View className='gps-location-box'>

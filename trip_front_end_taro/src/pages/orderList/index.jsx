@@ -118,9 +118,8 @@ function OrderList() {
   };
 
   const handleOrderDetail = (orderId) => {
-    Taro.showToast({
-      title: '订单详情功能开发中',
-      icon: 'none'
+    Taro.navigateTo({
+      url: `/pages/orderDetail/index?id=${orderId}`
     });
   };
 
