@@ -395,15 +395,6 @@ function HotelDetail() {
         >
           {hotel.name}
         </Text>
-        <View className='header-action-group'>
-          <Text
-            className='header-collect'
-            onClick={handleCollect}
-            style={{ color: headerOpacity > 0.5 ? '#333' : '#fff' }}
-          >
-            {isFavorite ? '❤️' : '🤍'} {isFavorite ? '已收藏' : '收藏'}
-          </Text>
-        </View>
       </View>
 
       <ScrollView
@@ -554,17 +545,22 @@ function HotelDetail() {
 
       {/* 5.底部悬浮操作栏 */}
       <View className='sticky-footer'>
-        <View className='footer-left-chat' onClick={handleAskHotel}>
-          <View className='chat-icon'>问</View>
-        </View>
         <View className='footer-price-area'>
           <Text className='footer-price-symbol'>¥</Text>
           <Text className='footer-price-val'>{hotel.price}</Text>
-          <Text className='footer-price-unit'>起</Text>
         </View>
-        <Button className='footer-action-btn' onClick={handleBookNow}>
-          立即预订
-        </Button>
+        <View className='footer-right-group'>
+          <View
+            className='footer-collect-btn'
+            onClick={handleCollect}
+          >
+            <Text>{isFavorite ? '❤️' : '🤍'}</Text>
+            <Text>{isFavorite ? '已收藏' : '收藏'}</Text>
+          </View>
+          <Button className='footer-action-btn' onClick={handleBookNow}>
+            立即预订
+          </Button>
+        </View>
       </View>
 
       {/* 日历选择器 */}

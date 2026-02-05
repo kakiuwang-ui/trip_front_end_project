@@ -20,6 +20,11 @@ function Home() {
   const [tags, setTags] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
 
+  // --- 筛选条件 ---
+  const [selectedPriceRange, setSelectedPriceRange] = useState('');
+  const [selectedStarRating, setSelectedStarRating] = useState('');
+  const [selectedTags, setSelectedTags] = useState([]);
+
   // --- 搜索建议相关状态 ---
   const [showSearchSuggestion, setShowSearchSuggestion] = useState(false);
   const [searchHistory, setSearchHistory] = useState([]);
@@ -200,16 +205,48 @@ function Home() {
     if (isHourlyRoom) {
       return '钟点房';
     }
-    
+
     // 使用当前选中的日期计算
     const start = startDate ? dayjs(startDate) : today;
     const end = endDate ? dayjs(endDate) : tomorrow;
-    
+
     // 确保离店日期晚于入住，按天计算差值
     if (end.isAfter(start, 'day')) {
       return `共${end.diff(start, 'day')}晚`;
     }
     return '共1晚';
+  };
+
+  // 快捷日期选择
+  const handleQuickDateSelect = (type) => {
+    const todayStr = today.format('YYYY-MM-DD');
+    const tomorrowStr = tomorrow.format('YYYY-MM-DD');
+    const dayAfterTomorrowStr = today.add(2, 'day').format('YYYY-MM-DD');
+    const nextWeekStr = today.add(7, 'day').format('YYYY-MM-DD');
+
+    switch (type) {
+      case 'today':
+        setStartDate(todayStr);
+        setEndDate(tomorrowStr);
+        break;
+      case 'tomorrow':
+        setStartDate(tomorrowStr);
+        setEndDate(dayAfterTomorrowStr);
+        break;
+      case 'weekend':
+        // 找到本周末（周五到周日）
+        const dayOfWeek = today.day();
+        const daysUntilFriday = dayOfWeek <= 5 ? 5 - dayOfWeek : 7 - dayOfWeek + 5;
+        const fridayStr = today.add(daysUntilFriday, 'day').format('YYYY-MM-DD');
+        const sundayStr = today.add(daysUntilFriday + 2, 'day').format('YYYY-MM-DD');
+        setStartDate(fridayStr);
+        setEndDate(sundayStr);
+        break;
+      case 'nextweek':
+        setStartDate(nextWeekStr);
+        setEndDate(today.add(8, 'day').format('YYYY-MM-DD'));
+        break;
+    }
   };
 
   // 获取显示的日期格式
@@ -273,6 +310,56 @@ function Home() {
     });
   };
 
+  // 价格/星级筛选处理
+  const handleFilterSelect = () => {
+    Taro.showActionSheet({
+      itemList: ['选择价格', '选择星级'],
+      success: (res) => {
+        if (res.tapIndex === 0) {
+          // 选择价格范围
+          handlePriceSelect();
+        } else {
+          // 选择星级
+          handleStarSelect();
+        }
+      }
+    });
+  };
+
+  // 价格选择
+  const handlePriceSelect = () => {
+    const priceRanges = ['不限', '0-200元', '200-400元', '400-600元', '600元以上'];
+    Taro.showActionSheet({
+      itemList: priceRanges,
+      success: (res) => {
+        setSelectedPriceRange(priceRanges[res.tapIndex] === '不限' ? '' : priceRanges[res.tapIndex]);
+      }
+    });
+  };
+
+  // 星级选择
+  const handleStarSelect = () => {
+    const starRatings = ['不限', '三星级及以上', '四星级及以上', '五星级'];
+    Taro.showActionSheet({
+      itemList: starRatings,
+      success: (res) => {
+        setSelectedStarRating(starRatings[res.tapIndex] === '不限' ? '' : starRatings[res.tapIndex]);
+      }
+    });
+  };
+
+  // 标签点击处理
+  const handleTagClick = (tag) => {
+    const tagName = tag.name;
+    if (selectedTags.includes(tagName)) {
+      // 如果已选中，则取消选中
+      setSelectedTags(selectedTags.filter(t => t !== tagName));
+    } else {
+      // 如果未选中，则添加
+      setSelectedTags([...selectedTags, tagName]);
+    }
+  };
+
   // 查询按钮处理
   const handleSearch = () => {
     const keyword = searchKeyword.trim();
@@ -287,7 +374,10 @@ function Home() {
       locationId: selectedLocation?.id,
       checkInDate: startDate,
       checkOutDate: endDate,
-      keyword: keyword
+      keyword: keyword,
+      priceRange: selectedPriceRange,
+      starRating: selectedStarRating,
+      tags: selectedTags.join(',')
     };
 
     // 关闭搜索建议
@@ -321,7 +411,9 @@ function Home() {
           autoplay
           circular
           indicatorDots
-          indicatorColor="#ffffff80"
+          interval={5000}
+          duration={500}
+          indicatorColor="rgba(255, 255, 255, 0.4)"
           indicatorActiveColor="#ffffff"
           className='banner-swiper'
         >
@@ -331,11 +423,11 @@ function Home() {
                 className='banner-img'
                 src={img}
                 mode='aspectFill'
+                lazyLoad
               />
             </SwiperItem>
           ))}
         </Swiper>
-
       </View>
 
       {/* 搜索卡片主体 */}
@@ -425,6 +517,21 @@ function Home() {
           <Text className='night-count-total'>{getNightCount()}</Text>
         </View>
 
+        {/* 快捷日期选择 */}
+        {!isHourlyRoom && (
+          <View className='quick-date-row'>
+            <View className='quick-date-item' onClick={() => handleQuickDateSelect('today')}>
+              <Text className='quick-date-text'>今晚</Text>
+            </View>
+            <View className='quick-date-item' onClick={() => handleQuickDateSelect('tomorrow')}>
+              <Text className='quick-date-text'>明晚</Text>
+            </View>
+            <View className='quick-date-item' onClick={() => handleQuickDateSelect('weekend')}>
+              <Text className='quick-date-text'>周末</Text>
+            </View>
+          </View>
+        )}
+
         {/* 凌晨提示条：只在0-6点显示 */}
         {isEarlyMorning && (
           <View className='night-notice-bar'>
@@ -436,15 +543,22 @@ function Home() {
         )}
 
         {/* 价格/星级筛选 */}
-        <View className='row-section price-filter-row'>
-          <Text className='placeholder-light-text'>价格/星级</Text>
+        <View className='row-section price-filter-row' onClick={handleFilterSelect}>
+          <Text className={selectedPriceRange || selectedStarRating ? 'filter-active-text' : 'placeholder-light-text'}>
+            {selectedPriceRange || selectedStarRating || '价格/星级'}
+          </Text>
+          <View className='filter-arrow-icon'></View>
         </View>
 
         {/* 快速标签 */}
         <View className='quick-tags-row'>
           {tags.length > 0 ? (
             tags.map((tag) => (
-              <View key={tag.id} className='tag-bubble-item'>
+              <View
+                key={tag.id}
+                className={selectedTags.includes(tag.name) ? 'tag-bubble-item tag-active' : 'tag-bubble-item'}
+                onClick={() => handleTagClick(tag)}
+              >
                 {tag.name}
               </View>
             ))
