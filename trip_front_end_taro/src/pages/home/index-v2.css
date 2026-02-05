@@ -1,0 +1,368 @@
+/* 首页 - 高级版设计 */
+
+.home-page-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #F8F9FA 0%, #FFFFFF 100%);
+}
+
+/* ==================== 顶部轮播图 ==================== */
+.top-banner-box {
+  position: relative;
+  height: 400rpx;
+  overflow: hidden;
+}
+
+.banner-swiper {
+  width: 100%;
+  height: 400rpx;
+}
+
+.banner-img {
+  width: 100%;
+  height: 400rpx;
+  object-fit: cover;
+}
+
+/* Banner遮罩层渐变 */
+.top-banner-box::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120rpx;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);
+  pointer-events: none;
+}
+
+/* ==================== 搜索卡片 ==================== */
+.search-main-card {
+  margin: -80rpx 24rpx 24rpx;
+  padding: 32rpx 24rpx;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08),
+              0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 10;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20rpx);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ==================== 标签切换 ==================== */
+.tabs-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32rpx;
+  position: relative;
+  background: #F8F9FA;
+  border-radius: 16rpx;
+  padding: 8rpx;
+}
+
+.tab-item-box {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 12rpx;
+  border-radius: 12rpx;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.tab-item-box.active {
+  background: #FFFFFF;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.tab-text-val {
+  font-size: 28rpx;
+  color: #666666;
+  font-weight: 500;
+  transition: all 0.25s;
+}
+
+.tab-item-box.active .tab-text-val {
+  color: #0066FF;
+  font-weight: 600;
+}
+
+/* 移除旧的底部线条 */
+.tab-active-line {
+  display: none;
+}
+
+/* ==================== 搜索框 ==================== */
+.city-search-row {
+  display: flex;
+  align-items: center;
+  background: #F8F9FA;
+  border-radius: 16rpx;
+  padding: 4rpx;
+  margin-bottom: 24rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.25s;
+}
+
+.city-search-row:focus-within {
+  border-color: #0066FF;
+  background: #FFFFFF;
+  box-shadow: 0 4rpx 16rpx rgba(0, 102, 255, 0.1);
+}
+
+.city-wrap-box {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 20rpx;
+  background: #FFFFFF;
+  border-radius: 12rpx;
+  margin-right: 4rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  transition: all 0.25s;
+}
+
+.city-wrap-box:active {
+  transform: scale(0.96);
+}
+
+.city-label-text {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1A1A1A;
+  margin-right: 8rpx;
+}
+
+.triangle-down-icon {
+  width: 0;
+  height: 0;
+  border-left: 8rpx solid transparent;
+  border-right: 8rpx solid transparent;
+  border-top: 10rpx solid #666666;
+  transition: transform 0.25s;
+}
+
+.city-wrap-box:active .triangle-down-icon {
+  transform: rotate(180deg);
+}
+
+.input-wrap-box {
+  flex: 1;
+  position: relative;
+  padding: 16rpx 20rpx;
+}
+
+.search-input-el {
+  width: 100%;
+  font-size: 28rpx;
+  color: #1A1A1A;
+}
+
+.gps-location-box {
+  padding: 16rpx 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s;
+}
+
+.gps-location-box:active {
+  transform: scale(0.9);
+}
+
+.gps-circle-icon {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0066FF 0%, #4A90E2 100%);
+  position: relative;
+  box-shadow: 0 4rpx 12rpx rgba(0, 102, 255, 0.3);
+}
+
+.gps-circle-icon::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #FFFFFF;
+}
+
+/* ==================== 日期选择 ==================== */
+.date-select-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #F8F9FA 0%, #FFFFFF 100%);
+  border: 2rpx solid #E5E7EB;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+  transition: all 0.25s;
+}
+
+.date-select-row:active {
+  transform: scale(0.98);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+}
+
+.date-left-info {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.date-single-info {
+  flex: 1;
+}
+
+.date-item-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.date-val-num {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1A1A1A;
+}
+
+.date-desc-text {
+  font-size: 24rpx;
+  color: #999999;
+}
+
+.date-divider-line {
+  width: 40rpx;
+  height: 2rpx;
+  background: linear-gradient(90deg, #E5E7EB 0%, #0066FF 50%, #E5E7EB 100%);
+}
+
+.night-count-total {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #0066FF;
+  padding: 12rpx 20rpx;
+  background: rgba(0, 102, 255, 0.08);
+  border-radius: 12rpx;
+}
+
+/* ==================== 提示条 ==================== */
+.night-notice-bar {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  background: linear-gradient(135deg, #FFF7ED 0%, #FFF 100%);
+  border-left: 4rpx solid #FAAD14;
+  border-radius: 12rpx;
+  padding: 16rpx 20rpx;
+  margin-bottom: 24rpx;
+}
+
+.moon-icon-fix {
+  font-size: 32rpx;
+}
+
+.notice-content-text {
+  flex: 1;
+  font-size: 24rpx;
+  color: #666666;
+  line-height: 1.6;
+}
+
+/* ==================== 快速标签 ==================== */
+.quick-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+}
+
+.tag-bubble-item {
+  padding: 16rpx 24rpx;
+  background: #F8F9FA;
+  border: 2rpx solid transparent;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  color: #666666;
+  transition: all 0.25s;
+}
+
+.tag-bubble-item:active {
+  background: #0066FF;
+  color: #FFFFFF;
+  transform: scale(0.95);
+  box-shadow: 0 4rpx 12rpx rgba(0, 102, 255, 0.3);
+}
+
+/* ==================== 查询按钮 ==================== */
+.submit-search-btn {
+  width: 100%;
+  height: 96rpx;
+  background: linear-gradient(135deg, #0066FF 0%, #4A90E2 100%);
+  border-radius: 20rpx;
+  font-size: 32rpx;
+  color: #FFFFFF;
+  font-weight: 600;
+  border: none;
+  box-shadow: 0 8rpx 24rpx rgba(0, 102, 255, 0.3);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.submit-search-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.submit-search-btn:active {
+  transform: scale(0.96);
+  box-shadow: 0 4rpx 16rpx rgba(0, 102, 255, 0.4);
+}
+
+.submit-search-btn:active::before {
+  width: 500rpx;
+  height: 500rpx;
+}
+
+/* ==================== 响应式优化 ==================== */
+@media (prefers-color-scheme: dark) {
+  .home-page-container {
+    background: linear-gradient(180deg, #1A1A1A 0%, #0A0A0A 100%);
+  }
+
+  .search-main-card {
+    background: #2A2A2A;
+    box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.3);
+  }
+
+  .tab-text-val {
+    color: #CCCCCC;
+  }
+
+  .tab-item-box.active .tab-text-val {
+    color: #4A90E2;
+  }
+}
