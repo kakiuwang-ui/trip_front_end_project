@@ -7,6 +7,7 @@ import { View, Text, Image } from '@tarojs/components';
 import Taro, { usePullDownRefresh } from '@tarojs/taro';
 import { getMyFavorites, removeFavorite } from '../../services/favorite';
 import { formatStars, formatPrice } from '../../utils/format';
+import { DEFAULT_HOTEL_IMAGE } from '../../config/images';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import EmptyState from '../../components/EmptyState';
 import './index.css';
@@ -42,7 +43,7 @@ function FavoriteList() {
             address: hotel.address || '',
             price: formatPrice(hotel.minPrice),
             priceNum: hotel.minPrice || 0,
-            img: images[0] || 'http://localhost:3000/uploads/1770189062477-9-2026-02-03185959.png',
+            img: images[0] || DEFAULT_HOTEL_IMAGE,
             createdAt: fav.createdAt
           };
         });

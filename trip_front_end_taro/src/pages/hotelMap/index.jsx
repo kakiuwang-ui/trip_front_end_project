@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Map, CoverView, CoverImage } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 import { getHotels } from '../../services/hotel';
+import { DEFAULT_HOTEL_IMAGE } from '../../config/images';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import './index.css';
 
@@ -50,7 +51,7 @@ function HotelMap() {
             starRating: hotel.starRating || 3,
             latitude: hotel.latitude || 31.2304 + (Math.random() - 0.5) * 0.1,
             longitude: hotel.longitude || 121.4737 + (Math.random() - 0.5) * 0.1,
-            image: images[0] || 'http://localhost:3000/uploads/1770189062477-9-2026-02-03185959.png'
+            image: images[0] || DEFAULT_HOTEL_IMAGE
           };
         });
 

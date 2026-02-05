@@ -5,6 +5,7 @@ import Calendar from '../../components/Calendar';
 import SearchSuggestion from '../../components/SearchSuggestion';
 import { getLocations } from '../../services/location';
 import { getTags } from '../../services/tag';
+import { BANNER_IMAGES } from '../../config/images';
 import dayjs from 'dayjs';
 import './index.css';
 
@@ -324,27 +325,15 @@ function Home() {
           indicatorActiveColor="#ffffff"
           className='banner-swiper'
         >
-          <SwiperItem>
-            <Image
-              className='banner-img'
-              src='http://localhost:3000/uploads/1770189062477-9-2026-02-03185959.png'
-              mode='aspectFill'
-            />
-          </SwiperItem>
-          <SwiperItem>
-            <Image
-              className='banner-img'
-              src='http://localhost:3000/uploads/1770189498058-967-2026-02-03185959.png'
-              mode='aspectFill'
-            />
-          </SwiperItem>
-          <SwiperItem>
-            <Image
-              className='banner-img'
-              src='http://localhost:3000/uploads/1770189524279-198-2026-01-12155024.png'
-              mode='aspectFill'
-            />
-          </SwiperItem>
+          {BANNER_IMAGES.map((img, index) => (
+            <SwiperItem key={index}>
+              <Image
+                className='banner-img'
+                src={img}
+                mode='aspectFill'
+              />
+            </SwiperItem>
+          ))}
         </Swiper>
 
       </View>

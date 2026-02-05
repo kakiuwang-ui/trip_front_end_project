@@ -3,6 +3,7 @@ import { View, Text, Image, Button } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 import { getBookingById, cancelBooking } from '../../services/booking';
 import { formatDate, formatPrice } from '../../utils/format';
+import { DEFAULT_HOTEL_IMAGE } from '../../config/images';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import './index.css';
 
@@ -28,7 +29,7 @@ function OrderDetail() {
         const rawData = res.data;
 
         // 处理图片
-        let hotelImage = 'http://localhost:3000/uploads/1770189062477-9-2026-02-03185959.png';
+        let hotelImage = DEFAULT_HOTEL_IMAGE;
         if (rawData.hotel?.images) {
           try {
             const images = typeof rawData.hotel.images === 'string'

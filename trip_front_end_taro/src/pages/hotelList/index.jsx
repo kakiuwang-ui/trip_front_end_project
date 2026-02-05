@@ -3,6 +3,7 @@ import { View, Text, Image, Input } from '@tarojs/components';
 import Taro, { usePullDownRefresh } from '@tarojs/taro';
 import { getHotels } from '../../services/hotel';
 import { formatStars, formatPrice } from '../../utils/format';
+import { DEFAULT_HOTEL_IMAGE } from '../../config/images';
 import FilterPanel from '../../components/FilterPanel';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import EmptyState from '../../components/EmptyState';
@@ -89,7 +90,7 @@ function HotelList() {
             services: Array.isArray(facilities) ? facilities.slice(0, 4) : [],
             price: hotel.minPrice || '0',
             priceNum: parseInt(hotel.minPrice) || 0,
-            img: images[0] || 'http://localhost:3000/uploads/1770189062477-9-2026-02-03185959.png',
+            img: images[0] || DEFAULT_HOTEL_IMAGE,
             facilities: Array.isArray(facilities) ? facilities : []
           };
         });
