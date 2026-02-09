@@ -15,7 +15,7 @@ import './index.css';
 function HotelDetail() {
   // 获取路由参数
   const router = useRouter();
-  const hotelId = router.params.id;
+  const hotelId = Number(router.params.id);
   const checkIn = router.params.checkIn;
   const checkOut = router.params.checkOut;
 
@@ -165,6 +165,10 @@ function HotelDetail() {
   // 检查酒店是否已收藏
   const checkHotelFavorite = async () => {
     try {
+      if (!hotelId) {
+        console.warn('⚠️ hotelId为空，无法检查收藏状态');
+        return;
+      }
       const res = await checkFavorite(hotelId);
       if (res.success) {
         setIsFavorite(res.data?.isFavorite || false);
@@ -179,20 +183,38 @@ function HotelDetail() {
     try {
       if (isFavorite) {
         const res = await removeFavorite(hotelId);
+
         if (res.success) {
           setIsFavorite(false);
           Taro.showToast({ title: '已取消收藏', icon: 'success', duration: 1500 });
+        } else {
+          throw new Error(res.message || '取消收藏失败');
         }
       } else {
         const res = await addFavorite(hotelId);
+
         if (res.success) {
           setIsFavorite(true);
           Taro.showToast({ title: '收藏成功', icon: 'success', duration: 1500 });
+        } else {
+          throw new Error(res.message || '收藏失败');
         }
       }
     } catch (error) {
       console.error('❌ 收藏操作失败:', error);
-      Taro.showToast({ title: '操作失败，请重试', icon: 'none' });
+
+      // 如果是"已收藏"错误,更新状态并重新检查
+      if (error.message && error.message.includes('已收藏')) {
+        setIsFavorite(true);
+        await checkHotelFavorite();
+        Taro.showToast({ title: '该酒店已在收藏列表中', icon: 'none', duration: 1500 });
+      } else {
+        Taro.showToast({
+          title: error.message || '操作失败，请重试',
+          icon: 'none',
+          duration: 2000
+        });
+      }
     }
   };
 
@@ -551,10 +573,10 @@ function HotelDetail() {
         </View>
         <View className='footer-right-group'>
           <View
-            className='footer-collect-btn'
+            className={`footer-collect-btn ${isFavorite ? 'active' : ''}`}
             onClick={handleCollect}
           >
-            <Text>{isFavorite ? '❤️' : '🤍'}</Text>
+            <Text className='collect-icon'>{isFavorite ? '♥' : '♡'}</Text>
             <Text>{isFavorite ? '已收藏' : '收藏'}</Text>
           </View>
           <Button className='footer-action-btn' onClick={handleBookNow}>

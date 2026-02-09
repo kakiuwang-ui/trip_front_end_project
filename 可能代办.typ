@@ -171,3 +171,11 @@
 == 参考资料
 
 视频教程: https://www.bilibili.com/video/BV1r57Pz3E9Z/?spm_id_from=333.337.search-card.all.click&vd_source=4dedea1db20af9b788febfb457df5625
+
+语义理解 -> 选酒店
+
+multilanguage
+
+导航
+
+深色模式 theme

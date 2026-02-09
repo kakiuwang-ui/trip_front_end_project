@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, Input } from '@tarojs/components';
+import { View, Text, Image, Input, Map, CoverView } from '@tarojs/components';
 import Taro, { usePullDownRefresh } from '@tarojs/taro';
 import { getHotels } from '../../services/hotel';
 import { formatStars, formatPrice } from '../../utils/format';
@@ -30,6 +30,15 @@ function HotelList() {
   const [sortBy, setSortBy] = useState('recommend'); // recommend, distance, priceAsc, priceDesc
   // 搜索关键词（用于列表页实时搜索）
   const [localSearchKeyword, setLocalSearchKeyword] = useState('');
+  // 视图模式：list 或 map
+  const [viewMode, setViewMode] = useState('list');
+  // 地图相关
+  const [markers, setMarkers] = useState([]);
+  const [selectedHotel, setSelectedHotel] = useState(null);
+  const [mapCenter, setMapCenter] = useState({
+    latitude: 31.2304,
+    longitude: 121.4737
+  });
 
   // 页面加载时获取路由参数并加载酒店数据
   useEffect(() => {
@@ -62,7 +71,10 @@ function HotelList() {
     try {
       const res = await getHotels({
         locationId: params.locationId,
-        keyword: params.keyword
+        keyword: params.keyword,
+        priceRange: params.priceRange,
+        starRating: params.starRating,
+        tags: params.tags
       });
 
       if (res.success && res.data && res.data.length > 0) {
@@ -91,13 +103,20 @@ function HotelList() {
             price: hotel.minPrice || '0',
             priceNum: parseInt(hotel.minPrice) || 0,
             img: images[0] || DEFAULT_HOTEL_IMAGE,
-            facilities: Array.isArray(facilities) ? facilities : []
+            facilities: Array.isArray(facilities) ? facilities : [],
+            latitude: hotel.latitude,
+            longitude: hotel.longitude,
+            address: hotel.address || ''
           };
         });
 
         setHotelList(formattedHotels);
+
+        // 生成地图标记
+        generateMapMarkers(formattedHotels);
       } else {
         setHotelList([]);
+        setMarkers([]);
       }
     } catch (error) {
       console.error('❌ 加载酒店列表失败:', error);
@@ -105,6 +124,41 @@ function HotelList() {
       setHotelList([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 生成地图标记
+  const generateMapMarkers = (hotels) => {
+    const mapMarkers = hotels
+      .filter(hotel => hotel.latitude && hotel.longitude) // 只显示有坐标的酒店
+      .map((hotel) => ({
+        id: hotel.id,
+        latitude: hotel.latitude,
+        longitude: hotel.longitude,
+        title: hotel.name,
+        iconPath: '/assets/marker-hotel.png',
+        width: 30,
+        height: 30,
+        callout: {
+          content: `¥${hotel.price}`,
+          color: '#FFFFFF',
+          fontSize: 12,
+          borderRadius: 8,
+          bgColor: '#FF6B00',
+          padding: 8,
+          display: 'ALWAYS',
+          textAlign: 'center'
+        }
+      }));
+
+    setMarkers(mapMarkers);
+
+    // 设置地图中心为第一个酒店位置
+    if (mapMarkers.length > 0) {
+      setMapCenter({
+        latitude: mapMarkers[0].latitude,
+        longitude: mapMarkers[0].longitude
+      });
     }
   };
 
@@ -241,11 +295,29 @@ function HotelList() {
     Taro.navigateBack();
   };
 
-  // 打开地图
-  const handleOpenMap = () => {
-    Taro.navigateTo({
-      url: `/pages/hotelMap/index?params=${encodeURIComponent(JSON.stringify(searchParams))}`
-    });
+  // 切换视图模式
+  const toggleViewMode = () => {
+    const newMode = viewMode === 'list' ? 'map' : 'list';
+    setViewMode(newMode);
+
+    if (newMode === 'map') {
+      // 切换到地图视图时，更新地图标记
+      generateMapMarkers(filteredHotels);
+    }
+  };
+
+  // 点击地图标记
+  const handleMarkerTap = (e) => {
+    const markerId = e.detail.markerId;
+    const hotel = filteredHotels.find(h => h.id === markerId);
+    if (hotel) {
+      setSelectedHotel(hotel);
+    }
+  };
+
+  // 关闭酒店卡片
+  const handleCloseCard = () => {
+    setSelectedHotel(null);
   };
 
   return (
@@ -272,9 +344,9 @@ function HotelList() {
             />
           </View>
         </View>
-        <View className='map-entry-box' onClick={handleOpenMap}>
+        <View className='map-entry-box' onClick={toggleViewMode}>
           <View className='map-icon-dot'></View>
-          <Text className='map-text-small'>地图</Text>
+          <Text className='map-text-small'>{viewMode === 'list' ? '地图' : '列表'}</Text>
         </View>
       </View>
 
@@ -306,7 +378,23 @@ function HotelList() {
         </View>
       </View>
 
-      {/* 酒店列表主体 */}
+      {/* 筛选结果统计 */}
+      {!loading && (
+        <View className='result-stats-bar'>
+          <Text className='stats-text'>找到 {filteredHotels.length} 家酒店</Text>
+          {searchParams.priceRange && (
+            <Text className='stats-filter-tag'>{searchParams.priceRange}</Text>
+          )}
+          {searchParams.starRating && (
+            <Text className='stats-filter-tag'>{searchParams.starRating}</Text>
+          )}
+          {searchParams.tags && (
+            <Text className='stats-filter-tag'>{searchParams.tags.replace(/,/g, ' · ')}</Text>
+          )}
+        </View>
+      )}
+
+      {/* 酒店列表/地图视图 */}
       {loading ? (
         <LoadingSpinner text='加载中...' />
       ) : filteredHotels.length === 0 ? (
@@ -317,7 +405,7 @@ function HotelList() {
           buttonText='重新搜索'
           onButtonClick={() => loadHotels(searchParams)}
         />
-      ) : (
+      ) : viewMode === 'list' ? (
         <View className='hotel-list-body'>
           {filteredHotels.map((hotel) => (
             <View key={hotel.id} className='hotel-card-box' onClick={() => handleHotelClick(hotel.id)}>
@@ -372,6 +460,41 @@ function HotelList() {
               </View>
             </View>
           ))}
+        </View>
+      ) : (
+        <View className='hotel-map-container'>
+          <Map
+            className='hotel-map-view'
+            longitude={mapCenter.longitude}
+            latitude={mapCenter.latitude}
+            scale={14}
+            markers={markers}
+            onMarkerTap={handleMarkerTap}
+            showLocation
+          />
+
+          {/* 选中酒店的详情卡片 */}
+          {selectedHotel && (
+            <View className='hotel-card-popup'>
+              <View className='card-close' onClick={handleCloseCard}>✕</View>
+              <View className='card-content' onClick={() => handleHotelClick(selectedHotel.id)}>
+                <Image className='card-image' src={selectedHotel.img} mode='aspectFill' />
+                <View className='card-info'>
+                  <Text className='card-name'>{selectedHotel.name}</Text>
+                  <View className='card-rating'>
+                    <Text className='rating-score'>{selectedHotel.score}分</Text>
+                    <Text className='rating-stars'>{selectedHotel.stars}</Text>
+                  </View>
+                  <Text className='card-address'>{selectedHotel.address}</Text>
+                  <View className='card-price-row'>
+                    <Text className='price-label'>¥</Text>
+                    <Text className='price-value'>{selectedHotel.price}</Text>
+                    <Text className='price-unit'>起</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          )}
         </View>
       )}
 

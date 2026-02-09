@@ -46,19 +46,27 @@
 }
 
 .close-btn {
-  width: 60rpx;
-  height: 60rpx;
+  width: 64rpx;
+  height: 64rpx;
   border-radius: 50%;
   background-color: #f5f5f5;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.close-btn:active {
+  background-color: #e8e8e8;
+  transform: scale(0.95);
 }
 
 .close-text {
-  font-size: 40rpx;
+  font-size: 44rpx;
   color: #666;
   line-height: 1;
+  font-weight: 300;
 }
 
 /* 月份切换栏 */
@@ -89,23 +97,33 @@
 }
 
 .prev-month-btn, .next-month-btn {
-  width: 60rpx;
-  height: 60rpx;
+  width: 64rpx;
+  height: 64rpx;
   border-radius: 50%;
   background-color: #f5f5f5;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.prev-month-btn:active, .next-month-btn:active {
+  background-color: #e8e8e8;
+  transform: scale(0.95);
 }
 
 .prev-month-btn.disabled, .next-month-btn.disabled {
   opacity: 0.3;
   background-color: #f0f0f0;
+  pointer-events: none;
 }
 
 .arrow-icon {
-  font-size: 36rpx;
+  font-size: 40rpx;
   color: #333;
+  font-weight: bold;
+  line-height: 1;
 }
 
 /* 预约提示 */
@@ -145,11 +163,12 @@
 
 .date-cell {
   width: calc(100% / 7);
-  height: 100rpx;
+  height: 110rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  padding: 8rpx 0;
 }
 
 .day-content {
@@ -157,44 +176,63 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
+  width: 70rpx;
+  height: 90rpx;
+  position: relative;
 }
 
 .day-number {
-  width: 60rpx;
-  height: 60rpx;
+  width: 64rpx;
+  height: 64rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  font-size: 32rpx !important;
+  font-size: 30rpx !important;
   color: #000000 !important;
-  margin-bottom: 4rpx;
   font-weight: 400;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 
 .day-label {
   font-size: 20rpx;
   color: #666;
-  line-height: 20rpx;
-  height: 20rpx;
-  transform: scale(0.9);
+  line-height: 22rpx;
+  height: 22rpx;
+  margin-top: 2rpx;
+  white-space: nowrap;
+}
+
+.day-number.today {
+  border: 2rpx solid #1677ff;
+  color: #1677ff !important;
 }
 
 .today-label {
-  color: #ff6b6b !important;
+  color: #1677ff !important;
+  font-weight: 500;
 }
 
 .start-label, .end-label {
   color: #fff !important;
+  font-weight: 500;
 }
 
 .disabled-label {
   color: #ccc !important;
+  font-size: 18rpx;
 }
 
 /* 日期状态 */
+.date-cell.selectable {
+  cursor: pointer;
+}
+
+.date-cell.selectable:active {
+  transform: scale(0.95);
+}
+
 .date-cell.selectable:active .day-number {
   background-color: #f0f0f0;
 }
@@ -202,21 +240,30 @@
 .date-cell.selected .day-number {
   background-color: #1677ff !important;
   color: #fff !important;
-  font-weight: 600;
+  font-weight: 500;
+  transform: scale(1.05);
+  box-shadow: 0 2rpx 8rpx rgba(22, 119, 255, 0.3);
+  border: none !important;
 }
 
 .date-cell.selected .day-label {
-  color: #fff;
+  color: #fff !important;
+  font-weight: 500;
+}
+
+.date-cell.in-range {
+  background-color: #e6f4ff;
 }
 
 .date-cell.in-range .day-number {
-  background-color: #e6f4ff !important;
+  background-color: transparent !important;
   color: #1677ff !important;
+  font-weight: 500;
 }
 
 /* 非当前月份的日期 */
 .date-cell.other-month .day-number {
-  color: #ccc !important;
+  color: transparent !important;
   background-color: transparent !important;
 }
 
@@ -224,22 +271,43 @@
   display: none;
 }
 
+.date-cell.other-month {
+  pointer-events: none;
+}
+
 /* 禁用日期 */
 .date-cell.disabled .day-number {
-  color: #ccc !important;
+  color: #d9d9d9 !important;
   background-color: transparent !important;
 }
 
 .date-cell.disabled .day-label {
-  display: none;
+  color: #d9d9d9 !important;
 }
 
 .date-cell.disabled {
   pointer-events: none;
+  opacity: 0.4;
 }
 
+/* 可选日期 - 增强点击区域 */
 .date-cell.selectable {
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.date-cell.selectable .day-content {
+  position: relative;
+}
+
+.date-cell.selectable .day-content::before {
+  content: '';
+  position: absolute;
+  top: -4rpx;
+  left: -4rpx;
+  right: -4rpx;
+  bottom: -4rpx;
+  border-radius: 8rpx;
 }
 
 /* 底部 */
@@ -263,36 +331,45 @@
 }
 
 .summary-text {
-  font-size: 30rpx;
+  font-size: 32rpx;
   color: #333;
-  font-weight: 500;
-  margin-bottom: 4rpx;
+  font-weight: 600;
+  margin-bottom: 6rpx;
 }
 
 .date-range {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #666;
+  line-height: 1.4;
 }
 
 .confirm-btn {
-  padding: 20rpx 40rpx;
-  font-size: 28rpx;
-  border-radius: 8rpx;
+  padding: 22rpx 48rpx;
+  font-size: 30rpx;
+  border-radius: 12rpx;
   background-color: #f0f0f0;
   color: #999;
   border: none;
   margin-left: 30rpx;
-  min-width: 120rpx;
+  min-width: 140rpx;
   text-align: center;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  font-weight: 500;
 }
 
 .confirm-btn.active {
   background-color: #1677ff;
   color: #fff;
+  box-shadow: 0 4rpx 12rpx rgba(22, 119, 255, 0.3);
 }
 
 .confirm-btn.active:active {
   background-color: #0958d9;
-  transform: scale(0.98);
+  transform: scale(0.96);
+  box-shadow: 0 2rpx 8rpx rgba(22, 119, 255, 0.3);
+}
+
+.confirm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

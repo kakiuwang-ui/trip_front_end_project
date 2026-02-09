@@ -28,7 +28,7 @@ import { verifyAuth } from '@/app/api/utils/auth';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authResult = verifyAuth(request);
@@ -37,7 +37,8 @@ export async function DELETE(
     }
     const currentUserId = authResult.user.userId;
 
-    const hotelId = Number(params.id);
+    const { id } = await params;
+    const hotelId = Number(id);
 
     if (!hotelId || Number.isNaN(hotelId)) {
       return NextResponse.json({ success: false, error: '无效的酒店ID' }, { status: 400 });

@@ -10,6 +10,8 @@ import { get } from './request';
  * @param {number} params.locationId - 位置 ID
  * @param {string} params.tags - 标签列表（逗号分隔）
  * @param {string} params.keyword - 搜索关键词
+ * @param {string} params.priceRange - 价格范围
+ * @param {string} params.starRating - 星级
  * @param {number} params.page - 页码
  * @param {number} params.pageSize - 每页数量
  * @returns {Promise} 返回酒店列表
@@ -29,6 +31,14 @@ export const getHotels = async (params = {}) => {
 
     if (params.keyword) {
       queryParams.keyword = params.keyword;
+    }
+
+    if (params.priceRange) {
+      queryParams.priceRange = params.priceRange;
+    }
+
+    if (params.starRating) {
+      queryParams.starRating = params.starRating;
     }
 
     if (params.page) {

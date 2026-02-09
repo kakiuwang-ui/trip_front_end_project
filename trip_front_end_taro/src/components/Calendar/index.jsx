@@ -98,34 +98,50 @@ const Calendar = ({
   // 处理日期点击
   const handleDayClick = (day) => {
     if (!day) return
-    
+
     const dayStr = day.format('YYYY-MM-DD')
-    
+    console.log('📅 日期点击:', dayStr)
+
     // 检查日期是否在可选范围内
     if (day.isBefore(today, 'day') || day.isAfter(maxDate, 'day')) {
+      console.log('❌ 日期超出可选范围')
       return
     }
     
+    console.log('✅ 日期可选, 当前模式:', mode, '开始日期:', startDate, '结束日期:', endDate)
+
     if (mode === 'single') {
       // 单日期模式：直接选择该日期
+      console.log('📍 单日期模式: 选择', dayStr)
       onSelect(dayStr, '')
       // 单日期模式选择后立即确认
       onConfirm()
     } else {
-      // 区间模式：原有的选择逻辑
+      // 区间模式：更灵活的选择逻辑
       if (!startDate || (startDate && endDate)) {
-        // 如果还没有开始日期，或者已经有开始和结束日期，就重新开始选择
+        // 第一次选择，或重新开始选择
+        console.log('📍 区间模式: 选择第一个日期', dayStr)
         onSelect(dayStr, '')
       } else if (!endDate) {
-        // 如果已经有开始日期，选择结束日期
-        if (day.isAfter(dayjs(startDate), 'day')) {
-          onSelect(startDate, dayStr)
-        } else if (day.isSame(dayjs(startDate), 'day')) {
+        // 已经有第一个日期,选择第二个日期
+        const firstDay = dayjs(startDate)
+        const secondDay = day
+
+        if (secondDay.isSame(firstDay, 'day')) {
           // 如果选择的是同一天，就不处理
+          console.log('⚠️ 选择了同一天，忽略')
           return
+        }
+
+        // 自动判断哪个是入住日期(较早)、哪个是离店日期(较晚)
+        if (secondDay.isAfter(firstDay, 'day')) {
+          // 第二个日期在第一个日期之后 → 正常顺序
+          console.log('📍 区间模式: 入住', startDate, '离店', dayStr)
+          onSelect(startDate, dayStr)
         } else {
-          // 如果结束日期早于开始日期，重新选择开始日期
-          onSelect(dayStr, '')
+          // 第二个日期在第一个日期之前 → 自动调换顺序
+          console.log('📍 区间模式: 自动调换顺序 → 入住', dayStr, '离店', startDate)
+          onSelect(dayStr, startDate)
         }
       }
     }
@@ -134,21 +150,15 @@ const Calendar = ({
   // 检查日期是否可选
   const isDaySelectable = (day) => {
     if (!day) return false
-    
+
     // 基础检查：不能早于今天，不能晚于maxDate
     if (day.isBefore(today, 'day') || day.isAfter(maxDate, 'day')) {
       return false
     }
-    
-    // 区间模式特殊逻辑：如果已经选择了开始日期，那么之前日期不可选
-    if (mode === 'range' && startDate && !endDate) {
-      const startDay = dayjs(startDate)
-      // 在选择了开始日期但还没有选择结束日期时，开始日期之前的日期都不可选
-      if (day.isBefore(startDay, 'day')) {
-        return false
-      }
-    }
-    
+
+    // 移除了限制：现在所有在有效范围内的日期都可选
+    // 用户可以随时点击任何日期来重新选择入住日期
+
     return true
   }
   
@@ -255,12 +265,12 @@ const Calendar = ({
                   已选：{dayjs(startDate).format('MM月DD日')}
                 </Text>
                 <Text className='date-range'>
-                  请选择离店日期（不可选开始日期之前）
+                  请选择第二个日期（无需考虑先后顺序）
                 </Text>
               </View>
             ) : (
               <Text className='summary-text'>
-                请选择入住日期
+                请选择两个日期
               </Text>
             )}
           </View>
@@ -322,19 +332,11 @@ const Calendar = ({
         {/* 预约提示 */}
         <View className='booking-notice'>
           <Text className='notice-text'>
-            可选日期：今天至{maxDate.format('MM月DD日')}（共30天）
+            📅 可选日期：今天至{maxDate.format('MM月DD日')}（共30天）
           </Text>
-          <Text className='notice-text'>
-            当前显示：{availableMonths.length}个可预约月份中的第{currentMonthIndex + 1}个
-          </Text>
-          {mode === 'single' && (
-            <Text className='notice-text'>
-              钟点房模式：选择一天入住日期
-            </Text>
-          )}
           {mode === 'range' && startDate && !endDate && (
-            <Text className='notice-text'>
-              提示：已选择入住日期，离店日期不可早于入住日期
+            <Text className='notice-text' style={{ color: '#1677ff', fontWeight: 500 }}>
+              💡 请选择第二个日期（系统会自动识别入住和离店日期）
             </Text>
           )}
         </View>
@@ -367,20 +369,16 @@ const Calendar = ({
                     <Text className={`day-number ${isToday ? 'today' : ''}`}>
                       {day.date()}
                     </Text>
-                    {isToday && isInMonth && (
-                      <Text className='day-label today-label'>今天</Text>
-                    )}
-                    {isStartDate && isInMonth && (
-                      <Text className='day-label start-label'>
-                        {mode === 'single' ? '入住' : '入住'}
-                      </Text>
-                    )}
-                    {isEndDate && isInMonth && (
+                    {/* 优先级：入住/离店 > 今天 > 不可选 */}
+                    {isStartDate && isInMonth ? (
+                      <Text className='day-label start-label'>入住</Text>
+                    ) : isEndDate && isInMonth ? (
                       <Text className='day-label end-label'>离店</Text>
-                    )}
-                    {!isSelectable && isInMonth && (
+                    ) : isToday && isInMonth ? (
+                      <Text className='day-label today-label'>今天</Text>
+                    ) : !isSelectable && isInMonth ? (
                       <Text className='day-label disabled-label'>不可选</Text>
-                    )}
+                    ) : null}
                   </View>
                 ) : null}
               </View>

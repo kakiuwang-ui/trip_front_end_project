@@ -457,25 +457,39 @@
   border: 1rpx solid #e8e8e8;
   transition: all 0.2s ease;
   flex-shrink: 0;
-  gap: 4rpx;
+  gap: 6rpx;
   white-space: nowrap;
 }
 
-.footer-collect-btn text:first-child {
-  font-size: 24rpx;
-  line-height: 1;
-}
-
-.footer-collect-btn text:last-child {
+.footer-collect-btn text {
   font-size: 24rpx;
   color: #666;
   line-height: 1;
 }
 
-.footer-collect-btn:active {
-  transform: scale(0.96);
+.footer-collect-btn.active {
   background-color: #ffe5e5;
   border-color: #FF6B00;
+}
+
+.footer-collect-btn.active text {
+  color: #FF6B00;
+}
+
+.footer-collect-btn:active {
+  transform: scale(0.96);
+}
+
+/* 收藏图标 */
+.collect-icon {
+  font-size: 24rpx;
+  color: #ddd;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.footer-collect-btn.active .collect-icon {
+  color: #FF6B00;
 }
 
 .footer-price-symbol {
