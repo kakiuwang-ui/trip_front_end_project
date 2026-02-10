@@ -7,12 +7,16 @@ import { getLocations } from '../../services/location';
 import { getTags } from '../../services/tag';
 import { BANNER_IMAGES } from '../../config/images';
 import dayjs from 'dayjs';
+import { useLanguage } from '../../context/LanguageContext'; // 导入语言上下文
 import './index.css';
 
 function Home() {
+  // 使用语言上下文
+  const { t } = useLanguage();
+  
   // --- 基础状态：标签切换 ---
   const [currentTab, setCurrentTab] = useState(0);
-  const tabs = ['国内', '海外', '钟点房', '民宿'];
+  const tabs = [t('domestic'), t('overseas'), t('hourlyRoom'), t('homestay')];
 
   // --- 位置和标签数据（从 API 获取）---
   const [locations, setLocations] = useState([]);
@@ -28,14 +32,14 @@ function Home() {
   const [showSearchSuggestion, setShowSearchSuggestion] = useState(false);
   const [searchHistory, setSearchHistory] = useState([]);
   const [hotSearches] = useState([
-    '上海外滩酒店',
-    '浦东机场附近',
-    '迪士尼度假区',
-    '南京路步行街',
-    '虹桥枢纽',
-    '豫园附近',
-    '陆家嘴金融中心',
-    '新天地商圈'
+    t('hotSearch1'),
+    t('hotSearch2'),
+    t('hotSearch3'),
+    t('hotSearch4'),
+    t('hotSearch5'),
+    t('hotSearch6'),
+    t('hotSearch7'),
+    t('hotSearch8')
   ]);
 
   // --- 日历控制状态 ---
@@ -99,7 +103,7 @@ function Home() {
     } catch (error) {
       console.error('❌ 加载初始数据失败:', error);
       // 使用默认数据
-      setSelectedLocation({ id: 1, name: '上海' });
+      setSelectedLocation({ id: 1, name: t('defaultCity') });
     }
   };
 
@@ -141,14 +145,14 @@ function Home() {
   // 清空搜索历史
   const handleClearSearchHistory = () => {
     Taro.showModal({
-      title: '清空搜索历史',
-      content: '确定要清空所有搜索历史吗？',
+      title: t('clearSearchHistory'),
+      content: t('confirmClearHistory'),
       success: (res) => {
         if (res.confirm) {
           try {
             Taro.removeStorageSync('searchHistory');
             setSearchHistory([]);
-            Taro.showToast({ title: '已清空', icon: 'success', duration: 1000 });
+            Taro.showToast({ title: t('cleared'), icon: 'success', duration: 1000 });
           } catch (error) {
             console.error('❌ 清空搜索历史失败:', error);
           }
@@ -202,7 +206,7 @@ function Home() {
   // 3. 计算晚数或显示钟点房
   const getNightCount = () => {
     if (isHourlyRoom) {
-      return '钟点房';
+      return t('hourlyRoom');
     }
 
     // 使用当前选中的日期计算
@@ -211,9 +215,9 @@ function Home() {
 
     // 确保离店日期晚于入住，按天计算差值
     if (end.isAfter(start, 'day')) {
-      return `共${end.diff(start, 'day')}晚`;
+      return t('nightsCount', { count: end.diff(start, 'day') });
     }
-    return '共1晚';
+    return t('oneNight');
   };
 
   // 快捷日期选择
@@ -251,23 +255,23 @@ function Home() {
   // 获取显示的日期格式
   const getDisplayDate = (date, isToday = false, isTomorrow = false) => {
     if (date) {
-      return dayjs(date).format('MM月DD日');
+      return dayjs(date).format(t('dateFormat'));
     } else if (isTomorrow) {
-      return tomorrow.format('MM月DD日');
+      return tomorrow.format(t('dateFormat'));
     }
-    return today.format('MM月DD日');
+    return today.format(t('dateFormat'));
   };
 
   // 获取日期描述
   const getDateDesc = (isStartDate, date) => {
     if (isHourlyRoom) {
-      return date ? '入住日期' : '今天';
+      return date ? t('checkInDate') : t('today');
     }
     
     if (date) {
-      return isStartDate ? '入住' : '离店';
+      return isStartDate ? t('checkIn') : t('checkOut');
     }
-    return isStartDate ? '今天' : '明天';
+    return isStartDate ? t('today') : t('tomorrow');
   };
 
   // 切换标签时的处理
@@ -295,7 +299,7 @@ function Home() {
   // 城市选择处理
   const handleCitySelect = () => {
     if (locations.length === 0) {
-      Taro.showToast({ title: '加载中...', icon: 'none' });
+      Taro.showToast({ title: t('loading'), icon: 'none' });
       return;
     }
 
@@ -312,7 +316,7 @@ function Home() {
   // 价格/星级筛选处理
   const handleFilterSelect = () => {
     Taro.showActionSheet({
-      itemList: ['选择价格', '选择星级'],
+      itemList: [t('selectPrice'), t('selectStar')],
       success: (res) => {
         if (res.tapIndex === 0) {
           // 选择价格范围
@@ -327,22 +331,33 @@ function Home() {
 
   // 价格选择
   const handlePriceSelect = () => {
-    const priceRanges = ['不限', '0-200元', '200-400元', '400-600元', '600元以上'];
+    const priceRanges = [
+      t('noLimit'),
+      t('priceRange1'),
+      t('priceRange2'),
+      t('priceRange3'),
+      t('priceRange4')
+    ];
     Taro.showActionSheet({
       itemList: priceRanges,
       success: (res) => {
-        setSelectedPriceRange(priceRanges[res.tapIndex] === '不限' ? '' : priceRanges[res.tapIndex]);
+        setSelectedPriceRange(priceRanges[res.tapIndex] === t('noLimit') ? '' : priceRanges[res.tapIndex]);
       }
     });
   };
 
   // 星级选择
   const handleStarSelect = () => {
-    const starRatings = ['不限', '三星级及以上', '四星级及以上', '五星级'];
+    const starRatings = [
+      t('noLimit'),
+      t('threeStarPlus'),
+      t('fourStarPlus'),
+      t('fiveStar')
+    ];
     Taro.showActionSheet({
       itemList: starRatings,
       success: (res) => {
-        setSelectedStarRating(starRatings[res.tapIndex] === '不限' ? '' : starRatings[res.tapIndex]);
+        setSelectedStarRating(starRatings[res.tapIndex] === t('noLimit') ? '' : starRatings[res.tapIndex]);
       }
     });
   };
@@ -436,14 +451,14 @@ function Home() {
         <View className='row-section city-search-row'>
           <View className='city-wrap-box' onClick={handleCitySelect}>
             <Text className='city-label-text'>
-              {selectedLocation?.name || '上海'}
+              {selectedLocation?.name || t('defaultCity')}
             </Text>
             <View className='triangle-down-icon'></View>
           </View>
           <View className='input-wrap-box' style={{ position: 'relative' }}>
             <Input
               className='search-input-el'
-              placeholder='位置/品牌/酒店'
+              placeholder={t('searchPlaceholder')}
               placeholderStyle='color:#ccc;'
               value={searchKeyword}
               onInput={(e) => setSearchKeyword(e.detail.value)}
@@ -507,13 +522,13 @@ function Home() {
         {!isHourlyRoom && (
           <View className='quick-date-row'>
             <View className='quick-date-item' onClick={() => handleQuickDateSelect('today')}>
-              <Text className='quick-date-text'>今晚</Text>
+              <Text className='quick-date-text'>{t('tonight')}</Text>
             </View>
             <View className='quick-date-item' onClick={() => handleQuickDateSelect('tomorrow')}>
-              <Text className='quick-date-text'>明晚</Text>
+              <Text className='quick-date-text'>{t('tomorrowNight')}</Text>
             </View>
             <View className='quick-date-item' onClick={() => handleQuickDateSelect('weekend')}>
-              <Text className='quick-date-text'>周末</Text>
+              <Text className='quick-date-text'>{t('weekend')}</Text>
             </View>
           </View>
         )}
@@ -523,7 +538,7 @@ function Home() {
           <View className='night-notice-bar'>
             <Text className='moon-icon-fix'>🌙</Text>
             <Text className='notice-content-text'>
-              当前已过0点，如需今天凌晨6点前入住，请选择"今天凌晨"
+              {t('earlyMorningNotice')}
             </Text>
           </View>
         )}
@@ -531,7 +546,7 @@ function Home() {
         {/* 价格/星级筛选 */}
         <View className='row-section price-filter-row' onClick={handleFilterSelect}>
           <Text className={selectedPriceRange || selectedStarRating ? 'filter-active-text' : 'placeholder-light-text'}>
-            {selectedPriceRange || selectedStarRating || '价格/星级'}
+            {selectedPriceRange || selectedStarRating || t('priceStarFilter')}
           </Text>
           <View className='filter-arrow-icon'></View>
         </View>
@@ -549,16 +564,16 @@ function Home() {
             ))
           ) : (
             <>
-              <View className='tag-bubble-item'>免费停车场</View>
-              <View className='tag-bubble-item'>上海浦东国际机场</View>
-              <View className='tag-bubble-item'>上海虹桥...</View>
+              <View className='tag-bubble-item'>{t('freeParking')}</View>
+              <View className='tag-bubble-item'>{t('pudongAirport')}</View>
+              <View className='tag-bubble-item'>{t('hongqiaoAirport')}</View>
             </>
           )}
         </View>
 
         {/* 查询按钮 */}
         <Button className='submit-search-btn' onClick={handleSearch}>
-          查询
+          {t('search')}
         </Button>
       </View>
 
@@ -581,12 +596,13 @@ function Home() {
 
 // AI 助手组件
 const AiAssistant = () => {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     { 
       id: 'msg_0', 
       role: 'assistant', 
-      content: '您好！我是您的旅行助手。请问您想去哪里旅行，或者对酒店有什么要求？',
+      content: t('aiWelcome'),
       timestamp: new Date().getTime()
     }
   ]);
@@ -654,12 +670,12 @@ const AiAssistant = () => {
         } else if (response.data && response.data.recommendations) {
           // 如果API返回的是推荐列表，格式化显示
           const recs = response.data.recommendations;
-          aiContent = `我为您找到了${recs.length}个推荐：\n\n` +
+          aiContent = t('aiFoundRecommendations', { count: recs.length }) + '\n\n' +
             recs.map((rec, index) => 
-              `${index + 1}. ${rec.name || '未命名'} - ${rec.description || '暂无描述'}`
+              `${index + 1}. ${rec.name || t('unnamed')} - ${rec.description || t('noDescription')}`
             ).join('\n');
         } else {
-          aiContent = '我收到了您的请求，正在为您搜索合适的酒店...';
+          aiContent = t('aiSearchingHotels');
         }
 
         const assistantMsg = {
@@ -671,7 +687,7 @@ const AiAssistant = () => {
         
         setMessages(prev => [...prev, assistantMsg]);
       } else {
-        throw new Error(`请求失败，状态码: ${response.statusCode}`);
+        throw new Error(`${t('requestFailed')}: ${response.statusCode}`);
       }
     } catch (error) {
       console.error('API请求错误:', error);
@@ -680,7 +696,7 @@ const AiAssistant = () => {
       setMessages(prev => [...prev, {
         id: `err_${Date.now()}`,
         role: 'assistant',
-        content: '抱歉，服务暂时不可用，请稍后再试。',
+        content: t('serviceUnavailable'),
         timestamp: new Date().getTime()
       }]);
     } finally {
@@ -702,7 +718,7 @@ const AiAssistant = () => {
         onClick={() => setIsOpen(true)}
       >
         <Text className='ai-btn-icon'>🤖</Text>
-        <Text className='ai-btn-text'>AI 助手</Text>
+        <Text className='ai-btn-text'>{t('aiAssistant')}</Text>
       </View>
 
       {/* 2.聊天主窗口 */}
@@ -711,7 +727,7 @@ const AiAssistant = () => {
           <View className='chat-header'>
             <View className='header-left'>
               <Text className='header-avatar'>🤖</Text>
-              <Text className='header-title'>AI 旅行助手</Text>
+              <Text className='header-title'>{t('aiTravelAssistant')}</Text>
             </View>
             <View className='header-close' onClick={() => setIsOpen(false)}>×</View>
           </View>
@@ -754,7 +770,7 @@ const AiAssistant = () => {
               className='chat-input'
               value={input}
               onInput={e => setInput(e.detail.value)}
-              placeholder='例如：我想去上海预订酒店，预算500-1000元...'
+              placeholder={t('aiInputPlaceholder')}
               autoHeight
               fixed
               cursorSpacing={20}
@@ -766,7 +782,7 @@ const AiAssistant = () => {
               onClick={handleSend}
               disabled={loading || !input.trim()}
             >
-              {loading ? '发送中...' : '发送'}
+              {loading ? t('sending') : t('send')}
             </Button>
           </View>
         </View>

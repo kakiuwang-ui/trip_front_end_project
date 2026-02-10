@@ -18,9 +18,12 @@ import { formatStars, formatPrice } from '../../utils/format';
 import { DEFAULT_HOTEL_IMAGE } from '../../config/images';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import EmptyState from '../../components/EmptyState';
+import { useLanguage } from '../../context/LanguageContext'; // 导入语言上下文
 import './index.css';
 
 function FavoriteList() {
+  const { t } = useLanguage(); // 使用语言上下文
+  
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState([]);
   const [folders, setFolders] = useState([]);
@@ -39,7 +42,7 @@ function FavoriteList() {
       const res = await getFavoriteFolders();
       if (res.success && res.data) {
         setFolders([
-          { id: null, name: '全部收藏', count: 0 },
+          { id: null, name: t('allFavorites'), count: 0 },
           ...res.data.map(folder => ({
             id: folder.id,
             name: folder.name,
@@ -87,7 +90,7 @@ function FavoriteList() {
       }
     } catch (error) {
       console.error('❌ 加载收藏列表失败:', error);
-      Taro.showToast({ title: '加载失败，请重试', icon: 'none' });
+      Taro.showToast({ title: t('loadFailed'), icon: 'none' });
     } finally {
       setLoading(false);
     }
@@ -104,20 +107,20 @@ function FavoriteList() {
     e.stopPropagation();
 
     Taro.showModal({
-      title: '取消收藏',
-      content: '确定要取消收藏这家酒店吗？',
+      title: t('cancelFavorite'),
+      content: t('confirmCancelFavorite'),
       success: async (res) => {
         if (res.confirm) {
           try {
             const result = await removeFavorite(hotelId);
 
             if (result.success) {
-              Taro.showToast({ title: '已取消收藏', icon: 'success', duration: 1500 });
+              Taro.showToast({ title: t('favoriteCancelled'), icon: 'success', duration: 1500 });
               // 从列表中移除
               setFavorites(favorites.filter(f => f.hotelId !== hotelId));
             }
           } catch (error) {
-            Taro.showToast({ title: '取消失败，请重试', icon: 'none' });
+            Taro.showToast({ title: t('cancelFailed'), icon: 'none' });
           }
         }
       }
@@ -163,25 +166,25 @@ function FavoriteList() {
   // 批量删除收藏
   const handleBatchDelete = () => {
     if (selectedHotels.length === 0) {
-      Taro.showToast({ title: '请选择要删除的酒店', icon: 'none' });
+      Taro.showToast({ title: t('selectHotelsToDelete'), icon: 'none' });
       return;
     }
 
     Taro.showModal({
-      title: '批量删除',
-      content: `确定要删除选中的 ${selectedHotels.length} 家酒店吗？`,
+      title: t('batchDelete'),
+      content: t('confirmBatchDelete', { count: selectedHotels.length }),
       success: async (res) => {
         if (res.confirm) {
           try {
             const result = await batchRemoveFavorites(selectedHotels);
             if (result.success) {
-              Taro.showToast({ title: '删除成功', icon: 'success' });
+              Taro.showToast({ title: t('deleteSuccess'), icon: 'success' });
               setFavorites(favorites.filter(f => !selectedHotels.includes(f.hotelId)));
               setSelectedHotels([]);
               setIsEditMode(false);
             }
           } catch (error) {
-            Taro.showToast({ title: '删除失败', icon: 'none' });
+            Taro.showToast({ title: t('deleteFailed'), icon: 'none' });
           }
         }
       }
@@ -191,19 +194,19 @@ function FavoriteList() {
   // 创建新收藏夹
   const handleCreateFolder = () => {
     Taro.showModal({
-      title: '创建收藏夹',
+      title: t('createFolder'),
       editable: true,
-      placeholderText: '请输入收藏夹名称',
+      placeholderText: t('enterFolderName'),
       success: async (res) => {
         if (res.confirm && res.content) {
           try {
             const result = await createFavoriteFolder(res.content);
             if (result.success) {
-              Taro.showToast({ title: '创建成功', icon: 'success' });
+              Taro.showToast({ title: t('createSuccess'), icon: 'success' });
               loadFavoriteFolders();
             }
           } catch (error) {
-            Taro.showToast({ title: '创建失败', icon: 'none' });
+            Taro.showToast({ title: t('createFailed'), icon: 'none' });
           }
         }
       }
@@ -213,13 +216,13 @@ function FavoriteList() {
   // 移动到收藏夹
   const handleMoveToFolder = () => {
     if (selectedHotels.length === 0) {
-      Taro.showToast({ title: '请选择要移动的酒店', icon: 'none' });
+      Taro.showToast({ title: t('selectHotelsToMove'), icon: 'none' });
       return;
     }
 
     const folderNames = folders.filter(f => f.id !== null).map(f => f.name);
     if (folderNames.length === 0) {
-      Taro.showToast({ title: '请先创建收藏夹', icon: 'none' });
+      Taro.showToast({ title: t('createFolderFirst'), icon: 'none' });
       return;
     }
 
@@ -230,13 +233,13 @@ function FavoriteList() {
         try {
           const result = await moveFavoritesToFolder(selectedHotels, targetFolder.id);
           if (result.success) {
-            Taro.showToast({ title: '移动成功', icon: 'success' });
+            Taro.showToast({ title: t('moveSuccess'), icon: 'success' });
             setSelectedHotels([]);
             setIsEditMode(false);
             loadFavorites();
           }
         } catch (error) {
-          Taro.showToast({ title: '移动失败', icon: 'none' });
+          Taro.showToast({ title: t('moveFailed'), icon: 'none' });
         }
       }
     });
@@ -252,7 +255,7 @@ function FavoriteList() {
   if (loading) {
     return (
       <View className='favorite-page-container'>
-        <LoadingSpinner text='加载中...' fullScreen />
+        <LoadingSpinner text={t('loading')} fullScreen />
       </View>
     );
   }
@@ -262,9 +265,9 @@ function FavoriteList() {
       <View className='favorite-page-container'>
         <EmptyState
           image='💝'
-          title='暂无收藏'
-          description='快去收藏心仪的酒店吧'
-          buttonText='去逛逛'
+          title={t('noFavorites')}
+          description={t('goToCollect')}
+          buttonText={t('goBrowse')}
           onButtonClick={() => Taro.switchTab({ url: '/pages/home/index' })}
         />
       </View>
@@ -288,7 +291,7 @@ function FavoriteList() {
               </View>
             ))}
             <View className='folder-tab add-folder' onClick={handleCreateFolder}>
-              <Text>+ 新建</Text>
+              <Text>+ {t('newFolder')}</Text>
             </View>
           </View>
         </View>
@@ -297,27 +300,29 @@ function FavoriteList() {
       {/* 操作栏 */}
       <View className='favorite-actions'>
         <View className='favorite-count'>
-          <Text className='count-text'>共收藏{favorites.length}家酒店</Text>
+          <Text className='count-text'>
+            {t('favoriteCount', { count: favorites.length })}
+          </Text>
         </View>
         <View className='action-buttons'>
           {isEditMode ? (
             <>
               <Button className='action-btn' size='mini' onClick={toggleSelectAll}>
-                {selectedHotels.length === favorites.length ? '取消全选' : '全选'}
+                {selectedHotels.length === favorites.length ? t('deselectAll') : t('selectAll')}
               </Button>
               <Button className='action-btn' size='mini' onClick={handleMoveToFolder}>
-                移动
+                {t('move')}
               </Button>
               <Button className='action-btn danger' size='mini' onClick={handleBatchDelete}>
-                删除
+                {t('delete')}
               </Button>
               <Button className='action-btn' size='mini' onClick={toggleEditMode}>
-                完成
+                {t('done')}
               </Button>
             </>
           ) : (
             <Button className='action-btn' size='mini' onClick={toggleEditMode}>
-              管理
+              {t('manage')}
             </Button>
           )}
         </View>
@@ -344,7 +349,7 @@ function FavoriteList() {
 
               <View className='score-row'>
                 <View className='score-badge'>{hotel.score}</View>
-                <Text className='score-text'>分</Text>
+                <Text className='score-text'>{t('score')}</Text>
               </View>
 
               <Text className='hotel-address'>{hotel.address}</Text>
@@ -353,7 +358,7 @@ function FavoriteList() {
                 <View className='price-box'>
                   <Text className='price-symbol'>¥</Text>
                   <Text className='price-value'>{hotel.priceNum}</Text>
-                  <Text className='price-unit'>起</Text>
+                  <Text className='price-unit'>{t('startingFrom')}</Text>
                 </View>
 
                 <View
@@ -361,7 +366,7 @@ function FavoriteList() {
                   onClick={(e) => handleRemoveFavorite(hotel.hotelId, e)}
                 >
                   <Text className='favorite-icon'>♥</Text>
-                  <Text className='favorite-text'>已收藏</Text>
+                  <Text className='favorite-text'>{t('favorited')}</Text>
                 </View>
               </View>
             </View>

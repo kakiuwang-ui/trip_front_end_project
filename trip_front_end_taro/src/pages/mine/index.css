@@ -80,6 +80,8 @@
 /* 按钮组 */
 .auth-action-group {
   margin: 40rpx 30rpx;
+  display: flex;
+  gap: 20rpx;
 }
 
 .mine-btn-login {
@@ -89,9 +91,8 @@
   font-size: 32rpx;
   height: 90rpx;
   line-height: 90rpx;
-  margin-bottom: 20rpx;
+  flex: 1;
   border: none;
-  padding: 0;
 }
 
 .mine-btn-register {
@@ -102,11 +103,25 @@
   font-size: 32rpx;
   height: 90rpx;
   line-height: 90rpx;
-  padding: 0;
+  flex: 1;
 }
+
+/* 退出登录按钮样式 */
+.mine-btn-logout {
+  background-color: #ff4d4f;
+  color: #ffffff;
+  border-radius: 10rpx;
+  font-size: 32rpx;
+  height: 90rpx;
+  line-height: 90rpx;
+  border: none;
+  flex: 1;
+}
+
 /* 消除小程序Button原生默认边框/阴影 */
 .mine-btn-login::after,
-.mine-btn-register::after {
+.mine-btn-register::after,
+.mine-btn-logout::after {
   border: none;
 }
 
@@ -140,4 +155,40 @@
 .cell-arrow-right {
   font-size: 28rpx;
   color: #cccccc;
+}
+
+/* 语言切换列表项的右侧内容样式 */
+.cell-right-language {
+  display: flex;
+  align-items: center;
+}
+
+.current-language-text {
+  margin-right: 20rpx;
+  font-size: 28rpx;
+  color: #666;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .user-header-box {
+    padding: 0 20rpx;
+    padding-top: 40rpx;
+  }
+  
+  .mine-nav-row {
+    margin-left: 20rpx;
+    margin-right: 20rpx;
+  }
+  
+  .auth-action-group {
+    margin-left: 20rpx;
+    margin-right: 20rpx;
+  }
+  
+  .common-list-section {
+    margin-left: 20rpx;
+    margin-right: 20rpx;
+    padding: 0 20rpx;
+  }
 }
