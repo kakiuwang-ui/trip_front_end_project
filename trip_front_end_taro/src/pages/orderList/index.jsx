@@ -6,9 +6,12 @@ import { formatDate, formatPrice } from '../../utils/format';
 import { storage } from '../../utils/storage';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import EmptyState from '../../components/EmptyState';
+import { useTheme } from '../../utils/useTheme'
 import './index.css';
+import AiChatWidget from '../../components/AiChatWidget';
 
 function OrderList() {
+  const { cssVars } = useTheme()
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all'); // all, pending, confirmed, cancelled
@@ -136,7 +139,7 @@ function OrderList() {
   });
 
   return (
-    <View className='order-list-container'>
+    <View className='order-list-container' style={cssVars}>
       {/* 顶部标签栏 */}
       <View className='order-tabs'>
         <View
@@ -247,6 +250,7 @@ function OrderList() {
           />
         )}
       </ScrollView>
+      <AiChatWidget />
     </View>
   );
 }

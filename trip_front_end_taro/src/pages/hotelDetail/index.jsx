@@ -10,10 +10,13 @@ import { storage } from '../../utils/storage';
 import Calendar from '../../components/Calendar';
 import BookingConfirm from '../../components/BookingConfirm';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { useTheme } from '../../utils/useTheme'
 import './index.css';
+import AiChatWidget from '../../components/AiChatWidget';
 
 function HotelDetail() {
   // 获取路由参数
+  const { cssVars } = useTheme()
   const router = useRouter();
   const hotelId = Number(router.params.id);
   const checkIn = router.params.checkIn;
@@ -374,7 +377,7 @@ function HotelDetail() {
   // Loading 状态
   if (loading) {
     return (
-      <View className='detail-page-container'>
+      <View className='detail-page-container' style={cssVars}>
         <LoadingSpinner text='加载中...' fullScreen />
       </View>
     );
@@ -383,7 +386,7 @@ function HotelDetail() {
   // 数据为空
   if (!hotel) {
     return (
-      <View className='detail-page-container'>
+      <View className='detail-page-container' style={cssVars}>
         <View style={{ padding: '100rpx', textAlign: 'center' }}>
           <Text>酒店信息不存在</Text>
         </View>
@@ -392,7 +395,7 @@ function HotelDetail() {
   }
 
   return (
-    <View className='detail-page-container'>
+    <View className='detail-page-container' style={cssVars}>
       {/* 1.顶部导航栏 - 动态效果 */}
       <View
         className='detail-header'
@@ -611,6 +614,7 @@ function HotelDetail() {
         onClose={() => setShowBookingConfirm(false)}
         onConfirm={handleConfirmBooking}
       />
+      <AiChatWidget />
     </View>
   );
 }

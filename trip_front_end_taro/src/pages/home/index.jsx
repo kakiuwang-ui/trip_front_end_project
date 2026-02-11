@@ -1,15 +1,18 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, Image, Input, Button, Swiper, SwiperItem, ScrollView, Textarea } from '@tarojs/components';
+import { View, Text, Image, Input, Button, Swiper, SwiperItem, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import Calendar from '../../components/Calendar';
 import SearchSuggestion from '../../components/SearchSuggestion';
+import AiChatWidget from '../../components/AiChatWidget';
 import { getLocations } from '../../services/location';
 import { getTags } from '../../services/tag';
 import { BANNER_IMAGES } from '../../config/images';
 import dayjs from 'dayjs';
+import { useTheme } from '../../utils/useTheme'
 import './index.css';
 
 function Home() {
+  const { cssVars } = useTheme()
   // --- 基础状态：标签切换 ---
   const [currentTab, setCurrentTab] = useState(0);
   const tabs = ['国内', '海外', '钟点房', '民宿'];
@@ -390,7 +393,7 @@ function Home() {
 
   // ----------------------- 页面渲染 -----------------------
   return (
-    <View className='home-page-container'>
+    <View className='home-page-container' style={cssVars}>
       {/* 顶部轮播图 */}
       <View className='top-banner-box'>
         <Swiper
@@ -574,205 +577,9 @@ function Home() {
       />
 
       {/* AI 助手组件 */}
-      <AiAssistant />
+      <AiChatWidget />
     </View>
   );
 }
-
-// AI 助手组件
-const AiAssistant = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    { 
-      id: 'msg_0', 
-      role: 'assistant', 
-      content: '您好！我是您的旅行助手。请问您想去哪里旅行，或者对酒店有什么要求？',
-      timestamp: new Date().getTime()
-    }
-  ]);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [lastMsgId, setLastMsgId] = useState('msg_0');
-
-  // 当消息更新时，自动滚动到底部
-  useEffect(() => {
-    if (messages.length > 0) {
-      const lastMsgIndex = messages.length - 1;
-      setLastMsgId(`msg_${lastMsgIndex}`);
-    }
-  }, [messages, isOpen]);
-
-  const handleSend = async () => {
-    if (!input.trim() || loading) return;
-
-    const userMsg = {
-      id: `msg_${Date.now()}`,
-      role: 'user',
-      content: input,
-      timestamp: new Date().getTime()
-    };
-
-    // 添加用户消息
-    setMessages(prev => [...prev, userMsg]);
-    const userInput = input;
-    setInput('');
-    setLoading(true);
-
-    try {
-      console.log('发送消息到API:', userInput);
-      
-      // 调用您的本地AI推荐API
-      const response = await Taro.request({
-        url: 'http://localhost:3000/api/ai/recommend',
-        method: 'POST',
-        timeout: 30000, // 30秒超时
-        header: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        data: {
-          messages: [
-            ...messages.map(m => ({ 
-              role: m.role, 
-              content: m.content 
-            })),
-            { role: 'user', content: userInput }
-          ]
-        }
-      });
-
-      console.log('API响应:', response);
-
-      if (response.statusCode === 200) {
-        // 检查响应格式
-        let aiContent = '';
-        
-        if (typeof response.data === 'string') {
-          aiContent = response.data;
-        } else if (response.data && response.data.content) {
-          aiContent = response.data.content;
-        } else if (response.data && response.data.recommendations) {
-          // 如果API返回的是推荐列表，格式化显示
-          const recs = response.data.recommendations;
-          aiContent = `我为您找到了${recs.length}个推荐：\n\n` +
-            recs.map((rec, index) => 
-              `${index + 1}. ${rec.name || '未命名'} - ${rec.description || '暂无描述'}`
-            ).join('\n');
-        } else {
-          aiContent = '我收到了您的请求，正在为您搜索合适的酒店...';
-        }
-
-        const assistantMsg = {
-          id: `msg_${Date.now()}_ai`,
-          role: 'assistant',
-          content: aiContent,
-          timestamp: new Date().getTime()
-        };
-        
-        setMessages(prev => [...prev, assistantMsg]);
-      } else {
-        throw new Error(`请求失败，状态码: ${response.statusCode}`);
-      }
-    } catch (error) {
-      console.error('API请求错误:', error);
-      
-      // 简单的错误处理
-      setMessages(prev => [...prev, {
-        id: `err_${Date.now()}`,
-        role: 'assistant',
-        content: '抱歉，服务暂时不可用，请稍后再试。',
-        timestamp: new Date().getTime()
-      }]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 格式化时间
-  const formatTime = (timestamp) => {
-    const date = new Date(timestamp);
-    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-  };
-
-  return (
-    <View className='ai-assistant-wrapper'>
-      {/* 1.悬浮触发按钮 */}
-      <View 
-        className={`ai-float-btn ${isOpen ? 'active' : ''}`} 
-        onClick={() => setIsOpen(true)}
-      >
-        <Text className='ai-btn-icon'>🤖</Text>
-        <Text className='ai-btn-text'>AI 助手</Text>
-      </View>
-
-      {/* 2.聊天主窗口 */}
-      {isOpen && (
-        <View className='ai-chat-window'>
-          <View className='chat-header'>
-            <View className='header-left'>
-              <Text className='header-avatar'>🤖</Text>
-              <Text className='header-title'>AI 旅行助手</Text>
-            </View>
-            <View className='header-close' onClick={() => setIsOpen(false)}>×</View>
-          </View>
-
-          {/* 消息滚动区域 */}
-          <ScrollView
-            className='chat-scroll-view'
-            scrollY
-            scrollIntoView={lastMsgId}
-            scrollWithAnimation
-          >
-            {messages.map((item, index) => (
-              <View
-                key={item.id}
-                id={`msg_${index}`}
-                className={`message-row ${item.role === 'user' ? 'user-row' : 'bot-row'}`}
-              >
-                <View className='avatar-sm'>{item.role === 'user' ? '👤' : '🤖'}</View>
-                <View className='message-bubble'>
-                  <Text className='message-text'>{item.content}</Text>
-                  <Text className='message-time'>{formatTime(item.timestamp)}</Text>
-                </View>
-              </View>
-            ))}
-            
-            {/* 加载动画 */}
-            {loading && (
-              <View className='message-row bot-row'>
-                <View className='avatar-sm'>🤖</View>
-                <View className='message-bubble loading-bubble'>
-                  <View className='dot-flashing'></View>
-                </View>
-              </View>
-            )}
-          </ScrollView>
-
-          {/* 输入区域 */}
-          <View className='chat-input-bar'>
-            <Textarea
-              className='chat-input'
-              value={input}
-              onInput={e => setInput(e.detail.value)}
-              placeholder='例如：我想去上海预订酒店，预算500-1000元...'
-              autoHeight
-              fixed
-              cursorSpacing={20}
-              maxlength={500}
-              disabled={loading}
-            />
-            <Button
-              className={`chat-send-btn ${!input.trim() || loading ? 'disabled' : ''}`}
-              onClick={handleSend}
-              disabled={loading || !input.trim()}
-            >
-              {loading ? '发送中...' : '发送'}
-            </Button>
-          </View>
-        </View>
-      )}
-    </View>
-  );
-};
 
 export default Home;

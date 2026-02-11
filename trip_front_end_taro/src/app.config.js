@@ -1,4 +1,5 @@
 export default {
+  darkmode: true,
   pages: [
     'pages/home/index',
     'pages/hotelList/index',

@@ -22,7 +22,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: #fff;
+  background-color: var(--color-card-bg);
   border-top-left-radius: 20rpx;
   border-top-right-radius: 20rpx;
   max-height: 80vh;
@@ -36,20 +36,20 @@
   justify-content: space-between;
   align-items: center;
   padding: 40rpx 30rpx 20rpx;
-  border-bottom: 1rpx solid #eee;
+  border-bottom: 1rpx solid var(--color-border-base);
 }
 
 .header-title {
   font-size: 34rpx;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .close-btn {
   width: 64rpx;
   height: 64rpx;
   border-radius: 50%;
-  background-color: #f5f5f5;
+  background-color: var(--color-bg-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -58,13 +58,13 @@
 }
 
 .close-btn:active {
-  background-color: #e8e8e8;
+  background-color: var(--color-border-base);
   transform: scale(0.95);
 }
 
 .close-text {
   font-size: 44rpx;
-  color: #666;
+  color: var(--color-text-secondary);
   line-height: 1;
   font-weight: 300;
 }
@@ -75,7 +75,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 20rpx 30rpx;
-  border-bottom: 1rpx solid #eee;
+  border-bottom: 1rpx solid var(--color-border-base);
 }
 
 .current-month-info {
@@ -87,20 +87,20 @@
 .current-month-title {
   font-size: 32rpx;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary);
   margin-bottom: 4rpx;
 }
 
 .month-status-label {
   font-size: 22rpx;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .prev-month-btn, .next-month-btn {
   width: 64rpx;
   height: 64rpx;
   border-radius: 50%;
-  background-color: #f5f5f5;
+  background-color: var(--color-bg-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -109,19 +109,19 @@
 }
 
 .prev-month-btn:active, .next-month-btn:active {
-  background-color: #e8e8e8;
+  background-color: var(--color-border-base);
   transform: scale(0.95);
 }
 
 .prev-month-btn.disabled, .next-month-btn.disabled {
   opacity: 0.3;
-  background-color: #f0f0f0;
+  background-color: var(--color-bg-tertiary);
   pointer-events: none;
 }
 
 .arrow-icon {
   font-size: 40rpx;
-  color: #333;
+  color: var(--color-text-primary);
   font-weight: bold;
   line-height: 1;
 }
@@ -129,13 +129,13 @@
 /* 预约提示 */
 .booking-notice {
   padding: 16rpx 30rpx;
-  background-color: #f8f9fa;
-  border-bottom: 1rpx solid #eee;
+  background-color: var(--color-bg-secondary);
+  border-bottom: 1rpx solid var(--color-border-base);
 }
 
 .notice-text {
   font-size: 24rpx;
-  color: #666;
+  color: var(--color-text-secondary);
   line-height: 1.4;
 }
 
@@ -143,14 +143,14 @@
 .weekdays {
   display: flex;
   padding: 20rpx 0;
-  background-color: #fafafa;
+  background-color: var(--color-bg-secondary);
 }
 
 .weekday {
   flex: 1;
   text-align: center;
   font-size: 28rpx;
-  color: #666;
+  color: var(--color-text-secondary);
   font-weight: 500;
 }
 
@@ -197,7 +197,7 @@
 
 .day-label {
   font-size: 20rpx;
-  color: #666;
+  color: var(--color-text-secondary);
   line-height: 22rpx;
   height: 22rpx;
   margin-top: 2rpx;
@@ -205,12 +205,12 @@
 }
 
 .day-number.today {
-  border: 2rpx solid #1677ff;
-  color: #1677ff !important;
+  border: 2rpx solid var(--color-primary);
+  color: var(--color-primary) !important;
 }
 
 .today-label {
-  color: #1677ff !important;
+  color: var(--color-primary) !important;
   font-weight: 500;
 }
 
@@ -220,7 +220,7 @@
 }
 
 .disabled-label {
-  color: #ccc !important;
+  color: var(--color-text-disabled) !important;
   font-size: 18rpx;
 }
 
@@ -234,11 +234,11 @@
 }
 
 .date-cell.selectable:active .day-number {
-  background-color: #f0f0f0;
+  background-color: var(--color-bg-tertiary);
 }
 
 .date-cell.selected .day-number {
-  background-color: #1677ff !important;
+  background-color: var(--color-primary) !important;
   color: #fff !important;
   font-weight: 500;
   transform: scale(1.05);
@@ -257,7 +257,7 @@
 
 .date-cell.in-range .day-number {
   background-color: transparent !important;
-  color: #1677ff !important;
+  color: var(--color-primary) !important;
   font-weight: 500;
 }
 
@@ -316,8 +316,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 30rpx;
-  border-top: 1rpx solid #eee;
-  background-color: #fff;
+  border-top: 1rpx solid var(--color-border-base);
+  background-color: var(--color-card-bg);
   box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
 }
 
@@ -332,14 +332,14 @@
 
 .summary-text {
   font-size: 32rpx;
-  color: #333;
+  color: var(--color-text-primary);
   font-weight: 600;
   margin-bottom: 6rpx;
 }
 
 .date-range {
   font-size: 26rpx;
-  color: #666;
+  color: var(--color-text-secondary);
   line-height: 1.4;
 }
 
@@ -347,8 +347,8 @@
   padding: 22rpx 48rpx;
   font-size: 30rpx;
   border-radius: 12rpx;
-  background-color: #f0f0f0;
-  color: #999;
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-tertiary);
   border: none;
   margin-left: 30rpx;
   min-width: 140rpx;
@@ -358,7 +358,7 @@
 }
 
 .confirm-btn.active {
-  background-color: #1677ff;
+  background-color: var(--color-primary);
   color: #fff;
   box-shadow: 0 4rpx 12rpx rgba(22, 119, 255, 0.3);
 }

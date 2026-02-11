@@ -2,7 +2,7 @@
 
 /* 全局容器 */
 .detail-page-container {
-  background-color: #f7f8fa;
+  background-color: var(--color-bg-secondary);
   min-height: 100vh;
   padding-bottom: 150rpx; /* 为悬浮底部操作栏腾出空间 */
   position: relative;
@@ -124,7 +124,7 @@
   position: absolute;
   top: 30rpx;
   right: 90rpx;
-  background-color: #fff;
+  background-color: var(--color-card-bg);
   border-radius: 16rpx;
   padding: 6rpx 16rpx;
   font-size: 22rpx;
@@ -139,7 +139,7 @@
   margin-top: -60rpx; /* 浮动效果 */
   margin-left: 24rpx;
   margin-right: 24rpx;
-  background-color: #ffffff;
+  background-color: var(--color-card-bg);
   border-radius: 20rpx;
   padding: 30rpx;
   box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
@@ -165,7 +165,7 @@
 
 .hotel-rank-tag {
   font-size: 22rpx;
-  color: #999;
+  color: var(--color-text-tertiary);
   margin-bottom: 20rpx;
 }
 
@@ -188,19 +188,19 @@
 
 .icon-placeholder {
   font-size: 28rpx;
-  color: #007aff;
+  color: var(--color-primary);
   margin-bottom: 6rpx;
 }
 
 .facility-text {
   font-size: 20rpx;
-  color: #666;
+  color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
 .shortcut-arrow {
   font-size: 24rpx;
-  color: #999;
+  color: var(--color-text-tertiary);
   margin-left: 10rpx;
 }
 
@@ -218,7 +218,7 @@
 }
 
 .score-badge {
-  background-color: #007aff;
+  background-color: var(--color-primary);
   color: #fff;
   font-size: 24rpx;
   padding: 2rpx 8rpx;
@@ -228,13 +228,13 @@
 
 .score-desc {
   font-size: 24rpx;
-  color: #007aff;
+  color: var(--color-primary);
   margin-top: 5rpx;
 }
 
 .recommendation-text {
   font-size: 24rpx;
-  color: #666;
+  color: var(--color-text-secondary);
   margin-top: 10rpx;
 }
 
@@ -247,19 +247,19 @@
 
 .distance-text {
   font-size: 24rpx;
-  color: #333;
+  color: var(--color-text-primary);
   text-align: right;
 }
 
 .address-text {
   font-size: 20rpx;
-  color: #999;
+  color: var(--color-text-tertiary);
   margin-top: 5rpx;
   text-align: right;
 }
 
 .map-icon-small {
-  background-color: #f0f0f0;
+  background-color: var(--color-bg-tertiary);
   border-radius: 50%;
   width: 30rpx;
   height: 30rpx;
@@ -267,13 +267,13 @@
   text-align: center;
   line-height: 30rpx;
   margin-top: 10rpx;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .info-card-separator {
   width: 100%;
   height: 1rpx;
-  background-color: #f2f2f2;
+  background-color: var(--color-border-base);
   margin: 30rpx 0;
 }
 
@@ -283,7 +283,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 20rpx 0;
-  background-color: #f7f7f7;
+  background-color: var(--color-bg-secondary);
   border-radius: 8rpx;
   margin: 20rpx 0;
 }
@@ -305,19 +305,19 @@
 .date-val-num {
   font-size: 36rpx;
   font-weight: bold;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .date-desc-text {
   font-size: 24rpx;
-  color: #666;
+  color: var(--color-text-secondary);
   margin-top: 4rpx;
 }
 
 .date-divider-line {
   width: 30rpx;
   height: 2rpx;
-  background-color: #ccc;
+  background-color: var(--color-text-disabled);
   margin: 0 20rpx;
 }
 
@@ -332,7 +332,7 @@
 
 .date-change-arrow {
   font-size: 28rpx;
-  color: #999;
+  color: var(--color-text-tertiary);
   margin-right: 10rpx;
 }
 
@@ -351,18 +351,18 @@
   font-size: 24rpx;
   margin-right: 15rpx;
   margin-bottom: 15rpx;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .more-filter {
   font-size: 24rpx;
-  color: #999;
+  color: var(--color-text-tertiary);
   margin-left: auto;
 }
 
 /* 4.房型列表 */
 .room-type-section {
-  background-color: #fff;
+  background-color: var(--color-card-bg);
   margin: 20rpx 24rpx 0;
   border-radius: 20rpx;
   padding: 0 30rpx;
@@ -373,7 +373,7 @@
   display: flex;
   justify-content: space-between;
   padding: 30rpx 0;
-  border-bottom: 1rpx solid #f2f2f2;
+  border-bottom: 1rpx solid var(--color-border-base);
 }
 
 .room-header-title {
@@ -383,7 +383,7 @@
 
 .collapse-icon {
   font-size: 28rpx;
-  color: #999;
+  color: var(--color-text-tertiary);
 }
 
 .room-preview-row {
@@ -408,7 +408,7 @@
 
 .room-specs {
   font-size: 22rpx;
-  color: #666;
+  color: var(--color-text-secondary);
   margin-top: 10rpx;
   line-height: 1.4;
 }
@@ -421,8 +421,8 @@
   right: 0;
   width: 100%;
   height: 100rpx;
-  background-color: #ffffff;
-  border-top: 1rpx solid #f0f0f0;
+  background-color: var(--color-card-bg);
+  border-top: 1rpx solid var(--color-border-base);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -447,14 +447,14 @@
 }
 
 .footer-collect-btn {
-  background-color: #fff;
+  background-color: var(--color-card-bg);
   border-radius: 8rpx;
   padding: 0 16rpx;
   height: 60rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1rpx solid #e8e8e8;
+  border: 1rpx solid var(--color-border-base);
   transition: all 0.2s ease;
   flex-shrink: 0;
   gap: 6rpx;
@@ -463,7 +463,7 @@
 
 .footer-collect-btn text {
   font-size: 24rpx;
-  color: #666;
+  color: var(--color-text-secondary);
   line-height: 1;
 }
 
@@ -483,7 +483,7 @@
 /* 收藏图标 */
 .collect-icon {
   font-size: 24rpx;
-  color: #ddd;
+  color: var(--color-border-base);
   line-height: 1;
   transition: all 0.2s ease;
 }

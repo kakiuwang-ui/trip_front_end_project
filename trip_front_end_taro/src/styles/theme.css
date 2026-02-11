@@ -36,6 +36,12 @@
   --color-border-light: #F0F2F5;
   --color-border-dark: #D1D5DB;
 
+  /* 卡片背景（区别于页面背景） */
+  --color-card-bg: #FFFFFF;
+
+  /* 顶部 Header 背景（深色模式下换成深色，不再是蓝色） */
+  --color-header-bg: #1677ff;
+
   /* ==================== 间距系统 ==================== */
   --spacing-xs: 8rpx;
   --spacing-sm: 16rpx;
@@ -80,6 +86,30 @@
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* ==================== 深色模式（跟随系统） ==================== */
+@media (prefers-color-scheme: dark) {
+  :root, page {
+    --color-primary: #4a90e2;
+    --color-bg-base: #1a1a1a;
+    --color-bg-secondary: #242424;
+    --color-bg-tertiary: #2a2a2a;
+    --color-bg-overlay: rgba(0, 0, 0, 0.65);
+    --color-card-bg: #242424;
+    --color-text-primary: #e0e0e0;
+    --color-text-secondary: #a0a0a0;
+    --color-text-tertiary: #666666;
+    --color-text-disabled: #444444;
+    --color-border-base: #333333;
+    --color-border-light: #2a2a2a;
+    --color-border-dark: #444444;
+    --color-header-bg: #1a2332;
+    --shadow-sm: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4rpx 16rpx rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8rpx 24rpx rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 12rpx 32rpx rgba(0, 0, 0, 0.6);
+  }
 }
 
 /* ==================== 通用动画类 ==================== */

@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, Input, Button } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { register } from '../../services/auth';
+import { useTheme } from '../../utils/useTheme'
 import './index.css';
 
 function Register() {
+  const { cssVars } = useTheme()
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -109,7 +111,7 @@ function Register() {
   };
 
   return (
-    <View className='register-container'>
+    <View className='register-container' style={cssVars}>
       <View className='register-header'>
         <Text className='register-title'>易宿酒店</Text>
         <Text className='register-subtitle'>创建新账号</Text>

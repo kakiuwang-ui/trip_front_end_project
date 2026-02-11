@@ -1,19 +1,19 @@
 .favorite-page-container {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--color-bg-secondary);
   padding-bottom: 40rpx;
 }
 
 .favorite-count {
-  background: #fff;
+  background: var(--color-card-bg);
   padding: 24rpx 32rpx;
   margin-bottom: 20rpx;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border-base);
 }
 
 .count-text {
   font-size: 28rpx;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .favorite-list {
@@ -24,7 +24,7 @@
 }
 
 .favorite-card {
-  background: #fff;
+  background: var(--color-card-bg);
   border-radius: 16rpx;
   overflow: hidden;
   display: flex;
@@ -59,7 +59,7 @@
   flex: 1;
   font-size: 28rpx;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary);
   line-height: 1.4;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -93,12 +93,12 @@
 
 .score-text {
   font-size: 24rpx;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .hotel-address {
   font-size: 22rpx;
-  color: #999;
+  color: var(--color-text-tertiary);
   line-height: 1.5;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -143,7 +143,7 @@
   align-items: center;
   gap: 6rpx;
   padding: 10rpx 16rpx;
-  background: #f5f5f5;
+  background: var(--color-bg-secondary);
   border-radius: 40rpx;
   flex-shrink: 0;
   transition: all 0.2s ease;
@@ -166,7 +166,7 @@
 
 .favorite-text {
   font-size: 24rpx;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .favorite-btn.active .favorite-text {
@@ -175,8 +175,8 @@
 
 /* 收藏夹分类标签 */
 .folder-tabs {
-  background: #fff;
-  border-bottom: 1px solid #f0f0f0;
+  background: var(--color-card-bg);
+  border-bottom: 1px solid var(--color-border-base);
   padding: 16rpx 0;
 }
 
@@ -193,10 +193,10 @@
   align-items: center;
   gap: 4rpx;
   padding: 12rpx 24rpx;
-  background: #f5f5f5;
+  background: var(--color-bg-secondary);
   border-radius: 40rpx;
   font-size: 26rpx;
-  color: #666;
+  color: var(--color-text-secondary);
   flex-shrink: 0;
   transition: all 0.2s ease;
 }
@@ -208,8 +208,8 @@
 
 .folder-tab.add-folder {
   background: transparent;
-  border: 1rpx dashed #999;
-  color: #999;
+  border: 1rpx dashed var(--color-text-tertiary);
+  color: var(--color-text-tertiary);
 }
 
 .folder-name {
@@ -223,7 +223,7 @@
 
 /* 操作栏 */
 .favorite-actions {
-  background: #fff;
+  background: var(--color-card-bg);
   padding: 16rpx 32rpx;
   margin-bottom: 20rpx;
   display: flex;
@@ -240,8 +240,8 @@
   font-size: 24rpx;
   padding: 8rpx 20rpx;
   border-radius: 40rpx;
-  background: #f5f5f5;
-  color: #333;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
   border: none;
 }
 
@@ -262,8 +262,8 @@
   width: 40rpx;
   height: 40rpx;
   border-radius: 50%;
-  border: 2rpx solid #ddd;
-  background: #fff;
+  border: 2rpx solid var(--color-border-base);
+  background: var(--color-card-bg);
   display: flex;
   align-items: center;
   justify-content: center;

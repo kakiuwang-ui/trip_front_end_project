@@ -19,7 +19,7 @@
 .empty-state-title {
   font-size: 32px;
   font-weight: 500;
-  color: #333;
+  color: var(--color-text-primary);
   margin-bottom: 16px;
   text-align: center;
 }
@@ -27,7 +27,7 @@
 /* 空状态描述 */
 .empty-state-description {
   font-size: 28px;
-  color: #999;
+  color: var(--color-text-tertiary);
   text-align: center;
   line-height: 1.6;
   margin-bottom: 48px;
@@ -36,7 +36,7 @@
 /* 空状态按钮 */
 .empty-state-button {
   padding: 24px 64px;
-  background: #0066FF;
+  background: var(--color-primary);
   color: #fff;
   border-radius: 8px;
   font-size: 28px;

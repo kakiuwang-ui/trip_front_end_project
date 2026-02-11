@@ -18,9 +18,12 @@ import { formatStars, formatPrice } from '../../utils/format';
 import { DEFAULT_HOTEL_IMAGE } from '../../config/images';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import EmptyState from '../../components/EmptyState';
+import { useTheme } from '../../utils/useTheme'
 import './index.css';
+import AiChatWidget from '../../components/AiChatWidget';
 
 function FavoriteList() {
+  const { cssVars } = useTheme()
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState([]);
   const [folders, setFolders] = useState([]);
@@ -251,7 +254,7 @@ function FavoriteList() {
 
   if (loading) {
     return (
-      <View className='favorite-page-container'>
+      <View className='favorite-page-container' style={cssVars}>
         <LoadingSpinner text='加载中...' fullScreen />
       </View>
     );
@@ -259,7 +262,7 @@ function FavoriteList() {
 
   if (favorites.length === 0) {
     return (
-      <View className='favorite-page-container'>
+      <View className='favorite-page-container' style={cssVars}>
         <EmptyState
           image='💝'
           title='暂无收藏'
@@ -272,7 +275,7 @@ function FavoriteList() {
   }
 
   return (
-    <View className='favorite-page-container'>
+    <View className='favorite-page-container' style={cssVars}>
       {/* 收藏夹分类标签 */}
       {folders.length > 0 && (
         <View className='folder-tabs'>
@@ -368,6 +371,7 @@ function FavoriteList() {
           </View>
         ))}
       </View>
+      <AiChatWidget />
     </View>
   );
 }

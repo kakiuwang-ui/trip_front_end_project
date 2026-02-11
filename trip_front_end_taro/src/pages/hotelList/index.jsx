@@ -7,9 +7,12 @@ import { DEFAULT_HOTEL_IMAGE } from '../../config/images';
 import FilterPanel from '../../components/FilterPanel';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import EmptyState from '../../components/EmptyState';
+import AiChatWidget from '../../components/AiChatWidget';
+import { useTheme } from '../../utils/useTheme'
 import './index.css';
 
 function HotelList() {
+  const { cssVars } = useTheme()
   // 酒店列表数据
   const [hotelList, setHotelList] = useState([]);
   const [filteredHotels, setFilteredHotels] = useState([]);
@@ -321,7 +324,7 @@ function HotelList() {
   };
 
   return (
-    <View className='list-page-container'>
+    <View className='list-page-container' style={cssVars}>
       {/* 顶部搜索条 */}
       <View className='header-nav-section'>
         <View className='back-arrow-icon' onClick={handleBack}>{'<'}</View>
@@ -505,6 +508,9 @@ function HotelList() {
         onClose={() => setShowFilter(false)}
         onConfirm={handleConfirmFilter}
       />
+
+      {/* AI 助手悬浮按钮 */}
+      <AiChatWidget />
     </View>
   );
 }

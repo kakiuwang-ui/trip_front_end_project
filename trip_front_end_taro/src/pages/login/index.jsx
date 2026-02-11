@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, Input, Button } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { login } from '../../services/auth';
+import { useTheme } from '../../utils/useTheme'
 import './index.css';
 
 function Login() {
+  const { cssVars } = useTheme()
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -78,7 +80,7 @@ function Login() {
   };
 
   return (
-    <View className='login-container'>
+    <View className='login-container' style={cssVars}>
       <View className='login-header'>
         <Text className='login-title'>易宿酒店</Text>
         <Text className='login-subtitle'>欢迎回来</Text>

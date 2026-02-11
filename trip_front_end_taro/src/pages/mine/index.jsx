@@ -5,9 +5,26 @@ import { logout } from '../../services/auth';
 import { getMyFavorites } from '../../services/favorite';
 import { getMyBookings } from '../../services/booking';
 import { storage } from '../../utils/storage';
+import { useTheme } from '../../utils/useTheme';
+import { getSavedTheme, saveTheme, resolveTheme, applyNativeTheme, THEME } from '../../utils/theme';
+import AiChatWidget from '../../components/AiChatWidget';
 import './index.css';
 
 function Mine() {
+  const { cssVars, isDark } = useTheme();
+
+  // 主题偏好状态
+  const [themePreference, setThemePreference] = useState(getSavedTheme());
+
+  // 选择主题
+  const handleThemeSelect = (pref) => {
+    setThemePreference(pref);
+    saveTheme(pref);
+    const resolved = resolveTheme();
+    applyNativeTheme(resolved);
+    Taro.eventCenter.trigger('themeChanged', resolved);
+  };
+
   // 登录状态和用户信息
   const [isLogin, setIsLogin] = useState(false);
   const [user, setUser] = useState(null);
@@ -114,7 +131,7 @@ function Mine() {
   };
 
   return (
-<View className='mine-container'>
+<View className='mine-container' style={cssVars}>
 {/* 1.顶部用户信息区域 */}
 <View className='user-header-box'>
 <View className='avatar-placeholder-circle'></View>
@@ -172,11 +189,40 @@ function Mine() {
 <Text className='cell-left-text'>意见反馈</Text>
 <Text className='cell-arrow-right'>{'>'}</Text>
 </View>
-<View className='list-cell-row no-border'>
+<View className='list-cell-row'>
 <Text className='cell-left-text'>关于系统</Text>
 <Text className='cell-arrow-right'>{'>'}</Text>
 </View>
+<View className='list-cell-row no-border theme-picker-row'>
+<Text className='cell-left-text'>显示模式</Text>
+<View className='theme-seg-ctrl'>
+  <View
+    className={`theme-seg-item${themePreference === THEME.LIGHT ? ' theme-seg-active' : ''}`}
+    onClick={() => handleThemeSelect(THEME.LIGHT)}
+  >
+    <Text className='theme-seg-icon'>☀️</Text>
+    <Text className='theme-seg-label'>浅色</Text>
+  </View>
+  <View
+    className={`theme-seg-item${themePreference === THEME.SYSTEM ? ' theme-seg-active' : ''}`}
+    onClick={() => handleThemeSelect(THEME.SYSTEM)}
+  >
+    <Text className='theme-seg-icon'>🌐</Text>
+    <Text className='theme-seg-label'>跟随</Text>
+  </View>
+  <View
+    className={`theme-seg-item${themePreference === THEME.DARK ? ' theme-seg-active' : ''}`}
+    onClick={() => handleThemeSelect(THEME.DARK)}
+  >
+    <Text className='theme-seg-icon'>🌙</Text>
+    <Text className='theme-seg-label'>深色</Text>
+  </View>
 </View>
+</View>
+</View>
+
+{/* AI 助手悬浮按钮 */}
+<AiChatWidget />
 </View>
   );
 }

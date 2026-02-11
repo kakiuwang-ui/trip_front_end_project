@@ -8,9 +8,11 @@ import Taro, { useRouter } from '@tarojs/taro';
 import { getHotels } from '../../services/hotel';
 import { DEFAULT_HOTEL_IMAGE } from '../../config/images';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { useTheme } from '../../utils/useTheme'
 import './index.css';
 
 function HotelMap() {
+  const { cssVars } = useTheme()
   const router = useRouter();
   const searchParams = router.params.params ? JSON.parse(decodeURIComponent(router.params.params)) : {};
 
@@ -128,14 +130,14 @@ function HotelMap() {
 
   if (loading) {
     return (
-      <View className='map-page-container'>
+      <View className='map-page-container' style={cssVars}>
         <LoadingSpinner text='加载地图中...' fullScreen />
       </View>
     );
   }
 
   return (
-    <View className='map-page-container'>
+    <View className='map-page-container' style={cssVars}>
       <Map
         className='hotel-map'
         longitude={mapCenter.longitude}

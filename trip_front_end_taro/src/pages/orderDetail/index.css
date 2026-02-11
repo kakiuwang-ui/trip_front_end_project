@@ -1,6 +1,6 @@
 .order-detail-container {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--color-bg-secondary);
   padding-bottom: 150rpx;
 }
 
@@ -42,7 +42,7 @@
 
 /* 酒店信息卡片 */
 .hotel-card {
-  background: #fff;
+  background: var(--color-card-bg);
   margin: 20rpx;
   border-radius: 16rpx;
   padding: 32rpx;
@@ -55,7 +55,7 @@
 .section-title {
   font-size: 32rpx;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary);
   display: block;
 }
 
@@ -82,13 +82,13 @@
 .hotel-name {
   font-size: 32rpx;
   font-weight: 500;
-  color: #333;
+  color: var(--color-text-primary);
   line-height: 1.4;
 }
 
 .hotel-address {
   font-size: 26rpx;
-  color: #666;
+  color: var(--color-text-secondary);
   line-height: 1.5;
 }
 
@@ -96,7 +96,7 @@
   display: flex;
   gap: 24rpx;
   padding-top: 24rpx;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--color-border-base);
 }
 
 .action-btn {
@@ -106,7 +106,7 @@
   align-items: center;
   gap: 8rpx;
   padding: 16rpx;
-  background: #f8f8f8;
+  background: var(--color-bg-secondary);
   border-radius: 12rpx;
 }
 
@@ -116,12 +116,12 @@
 
 .action-text {
   font-size: 24rpx;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 /* 信息卡片 */
 .info-card {
-  background: #fff;
+  background: var(--color-card-bg);
   margin: 20rpx;
   border-radius: 16rpx;
   padding: 32rpx;
@@ -132,7 +132,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 20rpx 0;
-  border-bottom: 1px solid #f5f5f5;
+  border-bottom: 1px solid var(--color-bg-secondary);
 }
 
 .info-row:last-child {
@@ -141,12 +141,12 @@
 
 .info-label {
   font-size: 28rpx;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .info-value {
   font-size: 28rpx;
-  color: #333;
+  color: var(--color-text-primary);
   font-weight: 500;
   max-width: 400rpx;
   text-align: right;
@@ -159,13 +159,13 @@
   align-items: center;
   padding: 24rpx 0 0;
   margin-top: 16rpx;
-  border-top: 2px solid #f0f0f0;
+  border-top: 2px solid var(--color-border-base);
 }
 
 .total-label {
   font-size: 32rpx;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .total-price {
@@ -193,7 +193,7 @@
 
 .time-text {
   font-size: 24rpx;
-  color: #999;
+  color: var(--color-text-tertiary);
 }
 
 /* 底部操作栏 */
@@ -206,7 +206,7 @@
   gap: 24rpx;
   padding: 24rpx 32rpx;
   padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
-  background: #fff;
+  background: var(--color-card-bg);
   box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
 }
 
@@ -221,8 +221,8 @@
 }
 
 .cancel-btn {
-  background: #f5f5f5;
-  color: #666;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
 }
 
 .contact-btn {
@@ -241,5 +241,5 @@
 
 .error-text {
   font-size: 32rpx;
-  color: #999;
+  color: var(--color-text-tertiary);
 }

@@ -5,9 +5,12 @@ import { getBookingById, cancelBooking } from '../../services/booking';
 import { formatDate, formatPrice } from '../../utils/format';
 import { DEFAULT_HOTEL_IMAGE } from '../../config/images';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { useTheme } from '../../utils/useTheme'
 import './index.css';
+import AiChatWidget from '../../components/AiChatWidget';
 
 function OrderDetail() {
+  const { cssVars } = useTheme()
   const router = useRouter();
   const orderId = router.params.id;
 
@@ -153,7 +156,7 @@ function OrderDetail() {
 
   if (loading) {
     return (
-      <View className='order-detail-container'>
+      <View className='order-detail-container' style={cssVars}>
         <LoadingSpinner text='加载订单详情...' fullScreen />
       </View>
     );
@@ -161,7 +164,7 @@ function OrderDetail() {
 
   if (!order) {
     return (
-      <View className='order-detail-container'>
+      <View className='order-detail-container' style={cssVars}>
         <View className='error-container'>
           <Text className='error-text'>订单不存在</Text>
         </View>
@@ -170,7 +173,7 @@ function OrderDetail() {
   }
 
   return (
-    <View className='order-detail-container'>
+    <View className='order-detail-container' style={cssVars}>
       {/* 订单状态卡片 */}
       <View className='status-card'>
         <View className='status-icon-wrapper'>
@@ -290,6 +293,7 @@ function OrderDetail() {
           </Button>
         </View>
       )}
+      <AiChatWidget />
     </View>
   );
 }
