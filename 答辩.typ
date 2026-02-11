@@ -10,3 +10,11 @@ Prisma ORM
     ↓ SQL
 MySQL 数据库
 
+数据库层
+文件：prisma/schema.prisma
+
+深色模式
+
+
+微信小程序要在当前目录下编译
+cd trip_front_end_taro && npm run dev:weapp

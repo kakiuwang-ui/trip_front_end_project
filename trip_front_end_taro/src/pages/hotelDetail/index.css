@@ -526,3 +526,51 @@
   transform: scale(0.98);
   box-shadow: 0 2rpx 8rpx rgba(255, 107, 0, 0.4);
 }
+/* 剩余房间数 */
+.room-remaining {
+  font-size: 20rpx;
+  color: #52c41a;
+  margin-left: 8rpx;
+  font-weight: 500;
+}
+
+.room-remaining-urgent {
+  color: #ff4d4f;
+}
+
+.room-detail-btn.disabled {
+  background: #d9d9d9;
+  color: #999;
+  pointer-events: none;
+}
+
+/* 房卡价格布局 */
+.price-main-row {
+  display: flex;
+  align-items: baseline;
+}
+
+.price-total-text {
+  font-size: 20rpx;
+  color: #999;
+  margin-top: 4rpx;
+  display: block;
+}
+
+/* 底部价格区域 */
+.footer-price-row {
+  display: flex;
+  align-items: baseline;
+}
+
+.footer-price-per {
+  font-size: 20rpx;
+  color: #ff6b00;
+  margin-left: 4rpx;
+}
+
+.footer-price-total {
+  font-size: 20rpx;
+  color: #ff6b00;
+  display: block;
+}

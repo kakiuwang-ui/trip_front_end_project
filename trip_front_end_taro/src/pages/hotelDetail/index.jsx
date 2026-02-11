@@ -35,7 +35,6 @@ function HotelDetail() {
   const [selectedRoomTypeId, setSelectedRoomTypeId] = useState(null);
   const [showBookingConfirm, setShowBookingConfirm] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
-
   // 加载酒店详情和房型数据
   useEffect(() => {
     if (hotelId) {
@@ -43,6 +42,32 @@ function HotelDetail() {
       checkHotelFavorite();
     }
   }, [hotelId]);
+
+  // 日期变化时重新请求带库存的房型数据
+  useEffect(() => {
+    if (hotelId && startDate && endDate) {
+      refreshRoomAvailability(startDate, endDate);
+    }
+  }, [startDate, endDate]);
+
+  const refreshRoomAvailability = async (start, end) => {
+    try {
+      const res = await getHotelRoomTypes(hotelId, start, end);
+      if (res.success && res.data) {
+        setRoomTypes(prev => prev.map(room => {
+          const updated = res.data.find(r => r.id === room.id);
+          if (!updated) return room;
+          return {
+            ...room,
+            remainingRooms: updated.remainingRooms ?? null,
+            dynamicPrice: updated.dynamicPrice ?? null,
+          };
+        }));
+      }
+    } catch (error) {
+      console.error('刷新房型库存失败:', error);
+    }
+  };
 
   const loadHotelDetail = async () => {
     try {
@@ -104,8 +129,8 @@ function HotelDetail() {
         console.log('🏨 处理后的酒店数据:', hotelData);
         setHotel(hotelData);
 
-        // 加载房型列表
-        const roomTypesRes = await getHotelRoomTypes(hotelId);
+        // 加载房型列表（带日期以获取库存和动态价格）
+        const roomTypesRes = await getHotelRoomTypes(hotelId, startDate, endDate);
 
         if (roomTypesRes.success && roomTypesRes.data && roomTypesRes.data.length > 0) {
           const transformedRoomTypes = roomTypesRes.data.map(room => {
@@ -129,7 +154,9 @@ function HotelDetail() {
               floor: '10-20层',
               capacity: '2人入住',
               price: parseFloat(room.price) || 299,
-              features: amenitiesList
+              features: amenitiesList,
+              remainingRooms: room.remainingRooms ?? null,
+              dynamicPrice: room.dynamicPrice ?? null,
             };
           });
           console.log('🛏️ 处理后的房型数据:', transformedRoomTypes);
@@ -306,7 +333,8 @@ function HotelDetail() {
 
     try {
       const selectedRoom = roomTypes.find(r => r.id === selectedRoomTypeId);
-      const totalPrice = (selectedRoom?.price || 0) * getNightCount();
+      const nightlyPrice = selectedRoom ? (selectedRoom.dynamicPrice ?? selectedRoom.price ?? 0) : 0;
+      const totalPrice = nightlyPrice * getNightCount();
 
       const bookingData = {
         hotelId: hotel.id,
@@ -544,15 +572,25 @@ function HotelDetail() {
 
                 <View className='room-footer'>
                   <View className='price-section'>
-                    <Text className='room-price-symbol'>¥</Text>
-                    <Text className='room-price-val'>{room.price}</Text>
-                    <Text className='room-price-unit'>起</Text>
+                    <View className='price-main-row'>
+                      <Text className='room-price-symbol'>¥</Text>
+                      <Text className='room-price-val'>{room.dynamicPrice ?? room.price}</Text>
+                      <Text className='room-price-unit'>/晚</Text>
+                    </View>
+                    <Text className='price-total-text'>
+                      共{getNightCount()}晚 ¥{(room.dynamicPrice ?? room.price) * getNightCount()}
+                    </Text>
+                    {room.remainingRooms !== null && (
+                      <Text className={`room-remaining ${room.remainingRooms <= 3 ? 'room-remaining-urgent' : ''}`}>
+                        {room.remainingRooms === 0 ? '已售罄' : `仅剩${room.remainingRooms}间`}
+                      </Text>
+                    )}
                   </View>
                   <Button
-                    className={`room-detail-btn ${selectedRoomTypeId === room.id ? 'selected' : ''}`}
-                    onClick={() => handleViewRoom(room.id)}
+                    className={`room-detail-btn ${selectedRoomTypeId === room.id ? 'selected' : ''} ${room.remainingRooms === 0 ? 'disabled' : ''}`}
+                    onClick={() => room.remainingRooms !== 0 && handleViewRoom(room.id)}
                   >
-                    {selectedRoomTypeId === room.id ? '已选择' : '选择房型'}
+                    {room.remainingRooms === 0 ? '已售罄' : selectedRoomTypeId === room.id ? '已选择' : '选择房型'}
                   </Button>
                 </View>
               </View>
@@ -571,8 +609,26 @@ function HotelDetail() {
       {/* 5.底部悬浮操作栏 */}
       <View className='sticky-footer'>
         <View className='footer-price-area'>
-          <Text className='footer-price-symbol'>¥</Text>
-          <Text className='footer-price-val'>{hotel.price}</Text>
+          {(() => {
+            const selectedRoom = roomTypes.find(r => r.id === selectedRoomTypeId);
+            const nightlyPrice = selectedRoom ? (selectedRoom.dynamicPrice ?? selectedRoom.price) : null;
+            return selectedRoom ? (
+              <>
+                <View className='footer-price-row'>
+                  <Text className='footer-price-symbol'>¥</Text>
+                  <Text className='footer-price-val'>{nightlyPrice}</Text>
+                  <Text className='footer-price-per'>/晚</Text>
+                </View>
+                <Text className='footer-price-total'>共{getNightCount()}晚 ¥{nightlyPrice * getNightCount()}</Text>
+              </>
+            ) : (
+              <View className='footer-price-row'>
+                <Text className='footer-price-symbol'>¥</Text>
+                <Text className='footer-price-val'>{hotel.price}</Text>
+                <Text className='footer-price-per'>起</Text>
+              </View>
+            );
+          })()}
         </View>
         <View className='footer-right-group'>
           <View
@@ -610,7 +666,7 @@ function HotelDetail() {
         checkIn={dayjs(startDate).format('M月D日')}
         checkOut={dayjs(endDate).format('M月D日')}
         nights={getNightCount()}
-        totalPrice={(roomTypes.find(r => r.id === selectedRoomTypeId)?.price || 0) * getNightCount()}
+        totalPrice={(() => { const r = roomTypes.find(x => x.id === selectedRoomTypeId); return (r ? (r.dynamicPrice ?? r.price) : 0) * getNightCount(); })()}
         onClose={() => setShowBookingConfirm(false)}
         onConfirm={handleConfirmBooking}
       />

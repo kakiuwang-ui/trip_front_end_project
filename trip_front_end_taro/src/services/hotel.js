@@ -81,11 +81,17 @@ export const getHotelById = async (id) => {
 /**
  * 获取酒店房型列表
  * @param {number} hotelId - 酒店 ID
+ * @param {string} [startDate] - 开始日期 YYYY-MM-DD，传入后返回剩余量和动态价格
+ * @param {string} [endDate] - 结束日期 YYYY-MM-DD
  * @returns {Promise} 返回房型列表
  */
-export const getHotelRoomTypes = async (hotelId) => {
+export const getHotelRoomTypes = async (hotelId, startDate, endDate) => {
   try {
-    const res = await get(`/hotels/${hotelId}/room-types`);
+    const params = {};
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+
+    const res = await get(`/hotels/${hotelId}/room-types`, params);
 
     console.log('✅ 获取房型列表成功:', res);
 

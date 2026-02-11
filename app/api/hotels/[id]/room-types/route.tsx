@@ -124,15 +124,70 @@ export async function GET(
   try {
     const params = await props.params;
     const hotelId = parseInt(params.id);
+    const { searchParams } = new URL(request.url);
+    const startDateStr = searchParams.get('startDate');
+    const endDateStr = searchParams.get('endDate');
 
     const roomTypes = await prisma.roomType.findMany({
       where: { hotelId },
-      include: {
-        // 可以选择包含当天的可用性概要，或者不包含保持轻量
-        // 这里仅返回基本信息
-      },
       orderBy: { price: 'asc' }
     });
+
+    // 如果传入了日期范围，聚合计算各房型的剩余量和均价
+    if (startDateStr && endDateStr) {
+      const start = new Date(startDateStr);
+      const end = new Date(endDateStr);
+
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+        const availabilities = await prisma.roomAvailability.findMany({
+          where: {
+            roomTypeId: { in: roomTypes.map(r => r.id) },
+            date: { gte: start, lte: end },
+          }
+        });
+
+        // 按 roomTypeId 分组
+        const availByRoom: Record<number, typeof availabilities> = {};
+        for (const item of availabilities) {
+          if (!availByRoom[item.roomTypeId]) availByRoom[item.roomTypeId] = [];
+          availByRoom[item.roomTypeId].push(item);
+        }
+
+        const roomTypesWithAvail = roomTypes.map(room => {
+          const items = availByRoom[room.id];
+
+          // 没有 availability 记录时，用 stock 作为剩余量，价格用基础价
+          if (!items || items.length === 0) {
+            return {
+              ...room,
+              remainingRooms: room.stock ?? null,
+              dynamicPrice: null,
+            };
+          }
+
+          // 最小剩余量（关闭的日期算0）
+          const minRemaining = items.reduce((min, item) => {
+            if (item.isClosed) return 0;
+            const remaining = item.quota - item.booked;
+            return Math.min(min, remaining);
+          }, Infinity);
+
+          // 未关闭日期的均价
+          const openItems = items.filter(item => !item.isClosed);
+          const avgPrice = openItems.length > 0
+            ? openItems.reduce((sum, item) => sum + Number(item.price), 0) / openItems.length
+            : null;
+
+          return {
+            ...room,
+            remainingRooms: minRemaining === Infinity ? room.stock ?? null : Math.max(0, minRemaining),
+            dynamicPrice: avgPrice !== null ? Math.round(avgPrice) : null,
+          };
+        });
+
+        return NextResponse.json({ success: true, data: roomTypesWithAvail });
+      }
+    }
 
     return NextResponse.json({ success: true, data: roomTypes });
   } catch (error) {
