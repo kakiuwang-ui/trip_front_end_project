@@ -2,6 +2,7 @@
 
 基于 Next.js 的现代化酒店预订和管理平台。
 
+视频演示：https://www.bilibili.com/video/BV1GxArztEK5/
 ## 技术栈
 
 - **框架**: Next.js 16.1.6 (App Router)
