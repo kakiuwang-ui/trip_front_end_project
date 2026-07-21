@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>易宿 · 全栈酒店管理平台技术说明</title>
+  <meta name="description" content="易宿（YiSu）全栈酒店管理平台技术说明：五层架构、事务防超卖、AI 两阶段推荐、RBAC 双层鉴权、Taro 多端统一。" />
+  <meta name="theme-color" content="#141416" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="易宿 · 全栈酒店管理平台技术说明" />
+  <meta property="og:description" content="五层架构 · 事务防超卖 · AI 两阶段流式推荐 · RBAC 双层鉴权 · Taro 多端统一。数字均取自代码实测。" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20fill='%23141416'/%3E%3Crect%20x='9'%20y='9'%20width='14'%20height='14'%20fill='%23ededed'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+
+  <!-- 移动端顶部水平进度 -->
+  <div class="top-progress" aria-hidden="true"><div class="tp-fill" id="tpFill"></div></div>
+
+  <!-- 左侧导航 + 进度 -->
+  <aside class="sidebar">
+    <a class="brand" href="#top">
+      <span class="brand-mark" aria-hidden="true">◧</span>
+      <span class="brand-txt">易宿 <b>/ YiSu</b><small>全栈酒店管理平台 · 技术说明</small></span>
+    </a>
+    <nav class="side-nav" aria-label="章节导航">
+      <ol class="rail-list">
+        <span class="rail-fill" id="spFill" aria-hidden="true"></span>
+        <li><a href="#demo" data-sec="demo"><i class="dot"></i><span class="ix">00</span><span class="lbl">现场演示</span></a></li>
+        <li><a href="#media" data-sec="media"><i class="dot"></i><span class="ix">01</span><span class="lbl">产品一览</span></a></li>
+        <li><a href="#overview" data-sec="overview"><i class="dot"></i><span class="ix">02</span><span class="lbl">概述</span></a></li>
+        <li><a href="#scale" data-sec="scale"><i class="dot"></i><span class="ix">03</span><span class="lbl">规模性能</span></a></li>
+        <li><a href="#stack" data-sec="stack"><i class="dot"></i><span class="ix">04</span><span class="lbl">技术栈</span></a></li>
+        <li><a href="#arch" data-sec="arch"><i class="dot"></i><span class="ix">05</span><span class="lbl">五层架构</span></a></li>
+        <li><a href="#data" data-sec="data"><i class="dot"></i><span class="ix">06</span><span class="lbl">数据模型</span></a></li>
+        <li><a href="#flows" data-sec="flows"><i class="dot"></i><span class="ix">07</span><span class="lbl">核心流程</span></a></li>
+        <li><a href="#api" data-sec="api"><i class="dot"></i><span class="ix">08</span><span class="lbl">API 接口</span></a></li>
+        <li><a href="#internals" data-sec="internals"><i class="dot"></i><span class="ix">09</span><span class="lbl">实现细节</span></a></li>
+        <li><a href="#security" data-sec="security"><i class="dot"></i><span class="ix">10</span><span class="lbl">安全设计</span></a></li>
+        <li><a href="#mobile" data-sec="mobile"><i class="dot"></i><span class="ix">11</span><span class="lbl">小程序端</span></a></li>
+        <li><a href="#deploy" data-sec="deploy"><i class="dot"></i><span class="ix">12</span><span class="lbl">部署工程化</span></a></li>
+        <li><a href="#inno" data-sec="inno"><i class="dot"></i><span class="ix">13</span><span class="lbl">创新点</span></a></li>
+        <li><a href="#rbac" data-sec="rbac"><i class="dot"></i><span class="ix">14</span><span class="lbl">权限矩阵</span></a></li>
+        <li><a href="#team" data-sec="team"><i class="dot"></i><span class="ix">15</span><span class="lbl">团队</span></a></li>
+      </ol>
+    </nav>
+    <div class="side-foot">
+      <span id="spPct">0%</span>
+      <span id="spCount">00 / 16</span>
+      <button class="pdf-btn" onclick="window.print()" title="导出 PDF">PDF ↓</button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+  <!-- ========== HERO ========== -->
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="coord">全栈工程 · 技术说明</div>
+      <h1>
+        <span class="cn">易宿 <span class="grad">酒店平台</span></span>
+        <span class="en">FULL-STACK · WEB + MINI-PROGRAM · ONE API</span>
+      </h1>
+      <p class="lede">
+        一套覆盖<b>平台管理、商户运营、用户预订</b>完整链路的全栈酒店系统。
+        Web 后台与微信小程序共用同一套 Next.js API，用自然语言就能订房。
+      </p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#demo">现场跑一次 AI 推荐</a>
+        <a class="btn btn-ghost" href="#arch"><span class="lbl">查看架构</span> <span class="arw">›</span></a>
+      </div>
+
+      <div class="readout" role="list">
+        <div class="cell" data-idx="01" role="listitem"><div class="n" data-count="41">0</div><div class="k">REST 路由端点</div></div>
+        <div class="cell" data-idx="02" role="listitem"><div class="n" data-count="17">0</div><div class="k">Prisma 数据模型</div></div>
+        <div class="cell" data-idx="03" role="listitem"><div class="n" data-count="34">0</div><div class="k">前端页面 · Web 20 + 小程序 14</div></div>
+        <div class="cell" data-idx="04" role="listitem"><div class="n" data-count="3">0</div><div class="k">端 · 共用一套后端</div></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========== 签名时刻：AI 两阶段流式演示 ========== -->
+  <section id="demo" class="demo">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">现场演示</div>
+        <h2 class="sec-title">用一句话订房，看它怎么想</h2>
+        <p class="sec-lead">下面是项目招牌功能的真实两阶段流程：先零温度提取结构化意图，再高温度流式生成推荐。全程复刻线上实现，可换场景重播。</p>
+      </div>
+
+      <div class="demo-card reveal" aria-label="AI 推荐演示">
+        <div class="demo-top">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="tt">app/api/ai/recommend</span>
+          <span class="live">LIVE DEMO</span>
+        </div>
+        <div class="demo-body">
+          <!-- 左：输入 + 阶段一意图提取 -->
+          <div class="demo-left">
+            <div class="demo-prompt">
+              <input class="inp" id="demoInput" type="text" aria-label="自然语言需求" value="找北京性价比高、带早餐的酒店" />
+              <button class="demo-run" id="demoRun">运行</button>
+            </div>
+            <div class="demo-chips" id="demoChips" role="group" aria-label="示例场景"></div>
+
+            <div class="stage-label"><span>① 意图提取</span><span class="dim">temperature 0 · withStructuredOutput(Zod)</span></div>
+            <div class="json-box" id="demoJson" aria-live="polite"></div>
+
+            <div class="query-line" id="demoQuery"></div>
+          </div>
+
+          <!-- 右：阶段二流式 + 结果卡 -->
+          <div class="demo-right">
+            <div class="stage-label"><span>② 流式生成</span><span class="dim">temperature 0.7 · SSE</span></div>
+            <div class="stream-box" id="demoStream" aria-live="polite"></div>
+            <div class="hotel-cards" id="demoCards"></div>
+            <div class="demo-hint" id="demoHint">↑ 滚动至此自动播放 · 可换场景重播</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 产品一览 ========== -->
+  <section id="media" class="alt">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">产品一览</div>
+        <h2 class="sec-title">真实运行录屏</h2>
+        <p class="sec-lead">以下为项目实际运行的录屏与截图，非原型稿。点击播放。</p>
+      </div>
+      <div class="gallery reveal">
+        <div class="mediacard">
+          <video src="assets/media/add-hotel.mp4" poster="assets/media/add-hotel.jpg" controls muted playsinline preload="none"></video>
+          <div class="cap"><span class="t">商户 · 添加酒店</span><span class="tg">MERCHANT · WEB</span></div>
+        </div>
+        <div class="mediacard">
+          <video src="assets/media/calendar.mp4" poster="assets/media/calendar.jpg" controls muted playsinline preload="none"></video>
+          <div class="cap"><span class="t">商户 · 动态定价日历</span><span class="tg">MERCHANT · WEB</span></div>
+        </div>
+        <div class="mediacard">
+          <video src="assets/media/booking-mgmt.mp4" poster="assets/media/booking-mgmt.jpg" controls muted playsinline preload="none"></video>
+          <div class="cap"><span class="t">商户 · 预订管理</span><span class="tg">MERCHANT · WEB</span></div>
+        </div>
+        <div class="mediacard shot">
+          <img src="assets/media/shot-web.jpg" alt="易宿微信小程序首页在微信开发者工具中运行的截图" loading="lazy" />
+          <div class="cap"><span class="t">微信小程序 · 首页搜索</span><span class="tg">MINI-PROGRAM</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 概述 ========== -->
+  <section id="overview" class="alt">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">概述</div>
+        <h2 class="sec-title">从行业痛点，到三端一体</h2>
+        <p class="sec-lead">现有平台的商户运营、审核追溯与用户搜索体验普遍薄弱。易宿重新组织了整条链路。</p>
+      </div>
+
+      <div class="pain reveal">
+        <div class="row"><span class="lab">商户端</span><span>功能薄弱，<b>无法动态定价</b>，房态与配额缺乏日粒度管理。</span></div>
+        <div class="row"><span class="lab">管理端</span><span>审核流程不透明，<b>缺乏操作追溯</b>，状态变更无审计留痕。</span></div>
+        <div class="row"><span class="lab">用户端</span><span>体验割裂，<b>自然语言搜索能力有限</b>，难以按真实意图匹配。</span></div>
+      </div>
+
+      <div class="grid ends reveal">
+        <div class="end e1">
+          <div class="tag">WEB · 管理员</div>
+          <h3>管理员后台</h3>
+          <div class="carrier">Web 浏览器</div>
+          <p>酒店审核审批、上下线管理、城市与标签维护、审计日志查询。</p>
+        </div>
+        <div class="end e2">
+          <div class="tag">WEB · 商户</div>
+          <h3>商户后台</h3>
+          <div class="carrier">Web 浏览器</div>
+          <p>酒店与房型 CRUD、动态定价日历、预订状态流转、数据可视化看板。</p>
+        </div>
+        <div class="end e3">
+          <div class="tag">MINI-PROGRAM · 用户</div>
+          <h3>用户端</h3>
+          <div class="carrier">微信小程序（Taro）</div>
+          <p>关键词与城市搜索、在线预订、地图导航、AI 对话推荐、评价与收藏。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 规模 · 性能 ========== -->
+  <section id="scale">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">规模与性能</div>
+        <h2 class="sec-title">工程量与实测读数</h2>
+        <p class="sec-lead">规模数字取自当前代码库统计；性能为本地开发环境（单机 + 千级样本）的对比自测，非标准化压测，仅示优化幅度。</p>
+      </div>
+
+      <div class="grid g3 reveal" style="margin-bottom:20px">
+        <div class="card"><h3 style="color:var(--l1)">65 个</h3><p>API 处理方法（GET 26 · POST 18 · PUT 9 · DELETE 12），分布于 41 个路由文件。</p></div>
+        <div class="card"><h3 style="color:var(--l2)">17 张</h3><p>数据库模型：User / Hotel / RoomType / RoomAvailability / Booking / Coupon / HotelAuditLog 等。</p></div>
+        <div class="card"><h3 style="color:var(--l4)">14 个</h3><p>可复用组件：小程序 9 个（Calendar / Icon / Skeleton / FilterPanel…）+ Web 5 个。</p></div>
+      </div>
+
+      <div class="grid perf reveal">
+        <div class="perf-card">
+          <div class="t">酒店列表接口</div>
+          <div class="s">10 条数据含 roomTypes 关联 · N+1 优化</div>
+          <div class="barline"><span class="lab">优化前</span><div class="bar b-before" style="width:100%">500ms</div></div>
+          <div class="barline"><span class="lab">优化后</span><div class="bar b-after" style="width:30%">150ms</div></div>
+          <div class="gain">↓ 70% · 批量查询消除 N+1</div>
+        </div>
+        <div class="perf-card">
+          <div class="t">酒店详情页 TTI</div>
+          <div class="s">首屏可交互时间 · 并行加载优化</div>
+          <div class="barline"><span class="lab">优化前</span><div class="bar b-before" style="width:100%">800ms</div></div>
+          <div class="barline"><span class="lab">优化后</span><div class="bar b-after" style="width:31%">250ms</div></div>
+          <div class="gain">↓ 69% · 详情 / 房型 / 库存并行请求</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 技术栈 ========== -->
+  <section id="stack" class="alt">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">技术栈</div>
+        <h2 class="sec-title">按层组织的技术选型</h2>
+        <p class="sec-lead">版本以仓库 <span class="mono">package.json</span> 为准。全链路 TypeScript，Prisma 生成的类型贯穿前后端。</p>
+      </div>
+
+      <div class="reveal">
+        <div class="stack-block">
+          <div class="cat"><span class="dot" style="background:var(--l1)"></span>展示层</div>
+          <div class="badges">
+            <span class="badge">Next.js <span class="v">16.1.6</span></span>
+            <span class="badge">React <span class="v">18.3</span></span>
+            <span class="badge">Ant Design <span class="v">6.2.2</span></span>
+            <span class="badge">Recharts <span class="v">3.7</span></span>
+            <span class="badge">next-themes <span class="v">0.4</span></span>
+            <span class="badge">Taro <span class="v">4.1.11</span></span>
+          </div>
+        </div>
+        <div class="stack-block">
+          <div class="cat"><span class="dot" style="background:var(--l2)"></span>服务层</div>
+          <div class="badges">
+            <span class="badge">Axios <span class="v">1.13</span></span>
+            <span class="badge">Taro.request</span>
+            <span class="badge">dayjs <span class="v">1.11</span></span>
+            <span class="badge">pinyin-pro <span class="v">3.28</span></span>
+          </div>
+        </div>
+        <div class="stack-block">
+          <div class="cat"><span class="dot" style="background:var(--l3)"></span>接口层</div>
+          <div class="badges">
+            <span class="badge">Next.js API Routes</span>
+            <span class="badge">jsonwebtoken <span class="v">9.0</span></span>
+            <span class="badge">bcryptjs <span class="v">3.0</span></span>
+            <span class="badge">Zod <span class="v">4.3</span></span>
+            <span class="badge">LangChain <span class="v">1.2.18</span></span>
+            <span class="badge">@langchain/openai <span class="v">1.2</span></span>
+            <span class="badge">next-swagger-doc <span class="v">0.4</span></span>
+          </div>
+        </div>
+        <div class="stack-block">
+          <div class="cat"><span class="dot" style="background:var(--l4)"></span>数据层</div>
+          <div class="badges">
+            <span class="badge">Prisma ORM <span class="v">6.19</span></span>
+            <span class="badge">ioredis <span class="v">5.10</span></span>
+          </div>
+        </div>
+        <div class="stack-block">
+          <div class="cat"><span class="dot" style="background:var(--l5)"></span>存储层</div>
+          <div class="badges">
+            <span class="badge">MySQL <span class="v">8.x · InnoDB</span></span>
+            <span class="badge">Redis <span class="v">Token 黑名单</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 五层架构（signature · 黑场） ========== -->
+  <section id="arch" class="dark">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow" style="color:#4ea1ff">系统架构</div>
+        <h2 class="sec-title">五层结构，一次请求自上而下</h2>
+        <p class="sec-lead">Next.js 同时承担 SSR 前端与 REST API。一次受保护请求携带 Bearer Token，经服务层、接口层鉴权、数据访问层，最终落到存储层。</p>
+      </div>
+
+      <div class="trace-bar reveal" role="group" aria-label="选择请求场景">
+        <span class="tb-label">// 选择场景，看请求逐层下钻</span>
+        <button class="tb-btn on" type="button" data-sc="0">受保护请求鉴权</button>
+        <button class="tb-btn" type="button" data-sc="1">在线预订 · 防超卖</button>
+        <button class="tb-btn" type="button" data-sc="2">AI 推荐 · 流式</button>
+      </div>
+
+      <div class="trace-grid reveal">
+        <div class="cut" id="archCut">
+          <div class="ruler" aria-hidden="true">
+            <div class="mk"><b>L1</b>展示</div>
+            <div class="mk"><b>L2</b>服务</div>
+            <div class="mk"><b>L3</b>接口</div>
+            <div class="mk"><b>L4</b>数据</div>
+            <div class="mk"><b>L5</b>存储</div>
+          </div>
+          <div class="strata">
+            <div class="stratum s1" data-l="1">
+              <span class="edge"></span>
+              <div class="lhead"><div class="lname">展示层</div><div class="lrole">PRESENTATION</div></div>
+              <div class="ldesc">Web 由 Next.js App Router 直接渲染；小程序由 Taro 编译为微信原生组件。</div>
+              <div class="lchips"><span>page.tsx</span><span>Taro 组件</span></div>
+            </div>
+            <div class="stratum s2" data-l="2">
+              <span class="edge"></span>
+              <div class="lhead"><div class="lname">服务层</div><div class="lrole">SERVICE</div></div>
+              <div class="ldesc">封装 API 调用：Web 用 Axios（拦截器 + 无感刷新），小程序用 Taro.request。</div>
+              <div class="lchips"><span>request.ts</span><span>request.js</span></div>
+            </div>
+            <div class="stratum s3" data-l="3">
+              <span class="edge"></span>
+              <div class="lhead"><div class="lname">接口层</div><div class="lrole">API ROUTES</div></div>
+              <div class="ldesc">Next.js API Routes 处理 HTTP，verifyAuth() 统一校验 JWT，细粒度权限查询 Permission 表。</div>
+              <div class="lchips"><span>verifyAuth()</span><span>checkPermission()</span></div>
+            </div>
+            <div class="stratum s4" data-l="4">
+              <span class="edge"></span>
+              <div class="lhead"><div class="lname">数据访问层</div><div class="lrole">DATA ACCESS</div></div>
+              <div class="ldesc">Prisma Client 全局单例提供类型安全 ORM 与 $transaction；Redis 承载 Token 黑名单。</div>
+              <div class="lchips"><span>prisma.ts</span><span>$transaction</span></div>
+            </div>
+            <div class="stratum s5" data-l="5">
+              <span class="edge"></span>
+              <div class="lhead"><div class="lname">存储层</div><div class="lrole">STORAGE</div></div>
+              <div class="ldesc">MySQL 8 · InnoDB 行锁与事务 ACID，唯一约束保证幂等与防重复。</div>
+              <div class="lchips"><span>行锁</span><span>唯一约束</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="trace-panel">
+          <div class="tp-head"><span id="traceTitle">受保护请求鉴权</span><span class="tp-method" id="traceMethod">GET /api/users/profile</span></div>
+          <ol class="trace-log" id="archLog" aria-live="polite"></ol>
+          <div class="tp-resp" id="traceResp"></div>
+          <button class="tb-btn tp-replay" type="button" id="traceReplay">↻ 重放</button>
+        </div>
+      </div>
+
+      <div class="cut-note reveal">
+        <span><b>入口文件</b> <span class="mono">app/lib/prisma.ts</span> · <span class="mono">app/api/utils/auth.ts</span></span>
+        <span><b>认证方式</b> HTTP Bearer Token</span>
+      </div>
+
+      <div class="ai-vein reveal">
+        <span class="badge-ai">AI 模块 · SSE 流式</span>
+        <p>AI 推荐横向嵌入接口层：<span class="mono">ai/recommend</span> → LangChain → OpenAI 兼容 API，两阶段调用后以 SSE 流式回包，不阻塞主链路。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 数据模型 ========== -->
+  <section id="data">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">数据模型</div>
+        <h2 class="sec-title">17 张表，围绕预订强一致性设计</h2>
+        <p class="sec-lead">Prisma schema 驱动。字段、约束、状态机均取自 <span class="mono">prisma/schema.prisma</span>。</p>
+      </div>
+
+      <div class="er reveal">
+        <div class="er-nodes" id="erNodes"></div>
+        <div class="er-panel" id="erPanel"></div>
+      </div>
+      <div class="er-hint mono reveal">点击表名 → 查看字段/约束，并高亮其关联表 · 共 17 表 / 29 关系</div>
+
+      <div class="fsm-wrap reveal">
+        <div class="fsm-card">
+          <div class="ft">酒店状态机 · Hotel.status</div>
+          <div class="fsm">
+            <span class="state warn">pending</span>
+            <span class="arr"><span class="g">→</span>审核通过</span>
+            <span class="state on">published</span>
+            <span class="arr"><span class="g">⇄</span>下线/恢复</span>
+            <span class="state off">offline</span>
+          </div>
+          <div class="fsm" style="margin-top:12px">
+            <span class="state warn">pending</span>
+            <span class="arr"><span class="g">→</span>驳回+原因</span>
+            <span class="state off">rejected</span>
+          </div>
+        </div>
+        <div class="fsm-card">
+          <div class="ft">订单状态机 · Booking.status</div>
+          <div class="fsm">
+            <span class="state warn">pending</span>
+            <span class="arr"><span class="g">→</span></span>
+            <span class="state on">confirmed</span>
+            <span class="arr"><span class="g">→</span></span>
+            <span class="state on">checked_in</span>
+            <span class="arr"><span class="g">→</span></span>
+            <span class="state on">checked_out</span>
+            <span class="arr"><span class="g">→</span></span>
+            <span class="state on">completed</span>
+          </div>
+          <div class="fsm" style="margin-top:12px">
+            <span class="state warn">pending</span>
+            <span class="arr"><span class="g">→</span>取消</span>
+            <span class="state off">cancelled</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 核心业务流程 ========== -->
+  <section id="flows" class="alt">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">核心流程</div>
+        <h2 class="sec-title">三条主链路，落到代码</h2>
+        <p class="sec-lead">以下步骤与代码片段直接来自 <span class="mono">app/api</span> 下的实现，非示意。</p>
+      </div>
+
+      <!-- 流程一：预订事务 -->
+      <div class="flow-split reveal">
+        <div>
+          <h3 class="sec-title" style="font-size:26px;text-align:left;margin-bottom:8px">① 事务性预订 · 防超卖</h3>
+          <p class="sec-lead" style="text-align:left;font-size:18px;margin-bottom:26px">
+            <span class="lead-code">prisma.$transaction</span> 内先批量查询、补齐逐日库存，再用条件更新原子扣减。查询从 <b class="mono">N×3</b> 降至 <b class="mono">N+3</b>，并发下靠 <span class="lead-code">booked &lt; quota</span> 条件杜绝超卖。
+          </p>
+          <div class="flow">
+            <div class="step"><div class="idx"><b>1</b></div><div class="body"><h4>生成日期数组</h4><p>由 checkIn 到 checkOut 逐日展开为 <code>dateArray</code>，先校验退房晚于入住、入住不早于今天。</p></div></div>
+            <div class="step"><div class="idx"><b>2</b></div><div class="body"><h4>批量查询 + 补齐库存</h4><p>一次 <code>findMany({ date: { in } })</code> 拉全区间；缺失日期用 <code>createMany</code> 以房型 stock 为 quota 补齐。</p></div></div>
+            <div class="step"><div class="idx"><b>3</b></div><div class="body"><h4>内存逐日校验并算价</h4><p>检查 <code>isClosed</code> 与 <code>booked &gt;= quota</code> 售罄，累加每日 <code>price</code>（日价可覆盖基础价）。</p></div></div>
+            <div class="step"><div class="idx"><b>4</b></div><div class="body"><h4>条件更新原子扣减</h4><p><code>updateMany</code> 带 <code>booked &lt; quota</code> 条件；<code>count === 0</code> 即判定并发冲突并整体回滚。</p></div></div>
+          </div>
+          <div class="annot">
+            <div class="ah">取舍 · Trade-off</div>
+            <p><b>为什么条件更新而非先读后写：</b>先读后写在并发下有 TOCTOU 竞态；把「检查+扣减」压成一条 <code>updateMany(booked &lt; quota)</code>，用受影响行数判定成败，天然串行化到那一行。<b>N+3 而非 N×3：</b>批量查询 + <code>createMany</code> 补齐，省去逐日多次往返。</p>
+          </div>
+        </div>
+        <div class="code" aria-label="预订事务代码片段">
+          <div class="chd"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="fp">app/api/bookings/route.tsx</span></div>
+<pre><code><span class="tok-c">// 逐日原子更新：并发安全，查询 N+3</span>
+<span class="tok-k">for</span> (<span class="tok-k">const</span> date <span class="tok-k">of</span> dateArray) {
+  <span class="tok-k">const</span> updated = <span class="tok-k">await</span> tx.roomAvailability.<span class="tok-fn">updateMany</span>({
+    where: {
+      roomTypeId,
+      date,
+      booked: { lt: quota }   <span class="tok-c">// ← 关键条件</span>
+    },
+    data: { booked: { increment: <span class="tok-n">1</span> } }
+  });
+
+  <span class="tok-k">if</span> (updated.count === <span class="tok-n">0</span>) {
+    <span class="tok-k">throw new</span> <span class="tok-t">Error</span>(<span class="tok-s">`已售罄（并发冲突）`</span>);
+  }
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- 交互：并发防超卖可视化 -->
+      <div class="oversell reveal" aria-label="并发防超卖演示">
+        <div class="oh">
+          <span class="ot">并发预订 · 最后 1 间房</span>
+          <button class="os-run" id="osRun" type="button">发起 3 个并发请求</button>
+        </div>
+        <div class="os-room">
+          <span>quota <b>1</b> · booked <b id="osBooked">0</b></span>
+          <div class="os-bar"><i id="osFill"></i></div>
+        </div>
+        <div class="os-reqs" id="osReqs"></div>
+        <div class="os-code"><b>UPDATE</b> room_availability SET booked = booked + 1 <b>WHERE</b> booked &lt; quota &nbsp;→&nbsp; 受影响行数决定成败，只有 1 个请求能改到那一行</div>
+      </div>
+
+      <!-- 流程二：AI 两阶段推荐 -->
+      <div class="flow-split reveal" style="margin-top:64px">
+        <div>
+          <h3 class="sec-title" style="font-size:26px;text-align:left;margin-bottom:8px">② AI 两阶段推荐 · 流式</h3>
+          <p class="sec-lead" style="text-align:left;font-size:18px;margin-bottom:26px">
+            先用 <span class="lead-code">temperature=0</span> 做确定性意图提取，转成 Prisma 查询取真实库存，再用 <span class="lead-code">temperature=0.7</span> 流式生成文案，经 SSE 回包。
+          </p>
+          <div class="flow">
+            <div class="step"><div class="idx"><b>1</b></div><div class="body"><h4>限流与入参校验</h4><p>超频返回 <code>429</code>；取最近 3 条对话 <code>slice(-3)</code> 作为提取上下文。</p></div></div>
+            <div class="step"><div class="idx"><b>2</b></div><div class="body"><h4>结构化意图提取</h4><p><code>withStructuredOutput(searchSchema)</code>（Zod）提取目的地/价格/星级等条件，未提及则置 null。</p></div></div>
+            <div class="step"><div class="idx"><b>3</b></div><div class="body"><h4>构建 Prisma 查询</h4><p>以 <code>status: 'published'</code> 为基，按提取条件拼 <code>where.OR</code>，查真实酒店与价格。</p></div></div>
+            <div class="step"><div class="idx"><b>4</b></div><div class="body"><h4>流式文案生成</h4><p>第二个模型 <code>streaming: true</code>，逐 chunk 写入 <code>ReadableStream</code> 返回。</p></div></div>
+          </div>
+          <div class="annot">
+            <div class="ah">取舍 · Trade-off</div>
+            <p><b>为什么两段温度：</b>提取阶段 <code>t=0</code> 求确定，保证结构化 JSON 稳定可解析；生成阶段 <code>t=0.7</code> 求自然。<b>为什么先查库再生成：</b>让模型基于真实库存推荐，杜绝「幻觉」出不存在的酒店。</p>
+          </div>
+        </div>
+        <div class="code" aria-label="AI 两阶段代码片段">
+          <div class="chd"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="fp">app/api/ai/recommend/route.ts</span></div>
+<pre><code><span class="tok-c">// 阶段一：确定性意图提取</span>
+<span class="tok-k">const</span> extractor = model.<span class="tok-fn">withStructuredOutput</span>(searchSchema);
+<span class="tok-k">const</span> criteria = <span class="tok-k">await</span> extractor.<span class="tok-fn">invoke</span>([
+  extractionPrompt, ...recentMessages
+]);
+
+<span class="tok-c">// 阶段二：流式文案（temperature 0.7）</span>
+<span class="tok-k">const</span> stream = <span class="tok-k">await</span> chatModel.<span class="tok-fn">stream</span>([
+  <span class="tok-k">new</span> <span class="tok-t">SystemMessage</span>(systemPromptText),
+  ...langChainMessages
+]);</code></pre>
+        </div>
+      </div>
+
+      <!-- 流程三：鉴权链路 -->
+      <div class="flow-split reveal" style="margin-top:64px">
+        <div>
+          <h3 class="sec-title" style="font-size:26px;text-align:left;margin-bottom:8px">③ 请求鉴权 · verifyAuth</h3>
+          <p class="sec-lead" style="text-align:left;font-size:18px;margin-bottom:26px">
+            每个受保护接口首行调用 <span class="lead-code">verifyAuth()</span>：验签 JWT，再查 Redis 黑名单确认未登出，解出 <code>{ userId, role, roleId, merchantId }</code> 供细粒度权限判断。
+          </p>
+          <div class="flow">
+            <div class="step"><div class="idx"><b>1</b></div><div class="body"><h4>取 Bearer Token</h4><p>无 <code>Authorization: Bearer</code> 头直接 <code>401</code>。</p></div></div>
+            <div class="step"><div class="idx"><b>2</b></div><div class="body"><h4>验签 + 黑名单</h4><p><code>jwt.verify</code> 通过后再查 <code>isTokenBlacklisted(token)</code>，已撤销则 401。</p></div></div>
+            <div class="step"><div class="idx"><b>3</b></div><div class="body"><h4>解析有效商户</h4><p><code>getEffectiveMerchantId</code>：MERCHANT 返回自身 id，STAFF 返回其所属 merchantId。</p></div></div>
+            <div class="step"><div class="idx"><b>4</b></div><div class="body"><h4>细粒度权限</h4><p>审核/删除额外校验 <code>HOTEL_AUDIT</code> / <code>HOTEL_DELETE</code> 权限名。</p></div></div>
+          </div>
+          <div class="annot">
+            <div class="ah">取舍 · Trade-off</div>
+            <p><b>为什么双层鉴权：</b>JWT 无状态、免每请求查库；但登出/改角色需即时失效 → 用 Redis <code>黑名单</code> + 权限缓存兜底。<b>STAFF 复用 merchantId：</b>继承所属商户的数据边界，无需为职员另建一套权限体系。</p>
+          </div>
+        </div>
+        <div class="code" aria-label="鉴权代码片段">
+          <div class="chd"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="fp">app/api/utils/auth.ts</span></div>
+<pre><code><span class="tok-k">const</span> decoded = jwt.<span class="tok-fn">verify</span>(token, JWT_SECRET);
+
+<span class="tok-c">// 检查 token 是否已被登出撤销</span>
+<span class="tok-k">if</span> (<span class="tok-k">await</span> <span class="tok-fn">isTokenBlacklisted</span>(token)) {
+  <span class="tok-k">return</span> { success: <span class="tok-n">false</span>,
+    error: <span class="tok-s">'Token 已被撤销'</span>, status: <span class="tok-n">401</span> };
+}
+
+<span class="tok-k">return</span> { success: <span class="tok-n">true</span>, user: decoded };</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== API 接口一览 ========== -->
+  <section id="api">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">API 接口</div>
+        <h2 class="sec-title">40 个 REST 端点，7 大业务域</h2>
+        <p class="sec-lead">Next.js API Routes 实测清单。每个 <span class="mono">route.tsx</span> 一个资源，导出 GET/POST/PUT/DELETE 处理方法；下表为代表性端点。</p>
+      </div>
+
+      <div class="api-stat reveal">
+        <div class="st"><div class="n">40</div><div class="k">端点</div></div>
+        <div class="st"><div class="n">65</div><div class="k">处理方法</div></div>
+        <div class="st"><div class="n">7</div><div class="k">业务域</div></div>
+      </div>
+
+      <div class="api-groups reveal">
+        <div class="api-group">
+          <div class="agh">认证 · Auth <span>4</span></div>
+          <div class="api-row" data-ep="login"><div class="ms"><span class="m">POST</span></div><div class="p">/api/auth/login</div></div>
+          <div class="api-row" data-ep="register"><div class="ms"><span class="m">POST</span></div><div class="p">/api/auth/register</div></div>
+          <div class="api-row"><div class="ms"><span class="m">POST</span></div><div class="p">/api/auth/refresh</div></div>
+          <div class="api-row"><div class="ms"><span class="m">POST</span></div><div class="p">/api/auth/logout</div></div>
+        </div>
+        <div class="api-group">
+          <div class="agh">酒店 · Hotels <span>5</span></div>
+          <div class="api-row" data-ep="hotels"><div class="ms"><span class="m get">GET</span><span class="m">POST</span></div><div class="p">/api/hotels</div></div>
+          <div class="api-row" data-ep="hotelPut"><div class="ms"><span class="m get">GET</span><span class="m">PUT</span><span class="m del">DEL</span></div><div class="p">/api/hotels/<em>[id]</em></div></div>
+          <div class="api-row"><div class="ms"><span class="m get">GET</span></div><div class="p">/api/hotels/<em>[id]</em>/audit_log</div></div>
+          <div class="api-row"><div class="ms"><span class="m get">GET</span></div><div class="p">/api/hotels/<em>[id]</em>/bookings</div></div>
+          <div class="api-row"><div class="ms"><span class="m get">GET</span><span class="m">POST</span></div><div class="p">/api/hotels/<em>[id]</em>/room-types</div></div>
+        </div>
+        <div class="api-group">
+          <div class="agh">预订 · Bookings <span>3</span></div>
+          <div class="api-row" data-ep="bookings"><div class="ms"><span class="m get">GET</span><span class="m">POST</span></div><div class="p">/api/bookings</div></div>
+          <div class="api-row"><div class="ms"><span class="m get">GET</span><span class="m">PUT</span><span class="m del">DEL</span></div><div class="p">/api/bookings/<em>[id]</em></div></div>
+          <div class="api-row"><div class="ms"><span class="m get">GET</span></div><div class="p">/api/users/<em>[id]</em>/bookings</div></div>
+        </div>
+        <div class="api-group">
+          <div class="agh">房态定价 · Rooms <span>4</span></div>
+          <div class="api-row" data-ep="availability"><div class="ms"><span class="m get">GET</span><span class="m">POST</span></div><div class="p">/api/room-types/<em>[id]</em>/availability</div></div>
+          <div class="api-row"><div class="ms"><span class="m">PUT</span><span class="m del">DEL</span></div><div class="p">/api/room-types/<em>[id]</em></div></div>
+          <div class="api-row"><div class="ms"><span class="m get">GET</span></div><div class="p">/api/room-availability</div></div>
+          <div class="api-row"><div class="ms"><span class="m">PUT</span><span class="m del">DEL</span></div><div class="p">/api/room-availability/<em>[id]</em></div></div>
+        </div>
+        <div class="api-group">
+          <div class="agh">互动营销 · Social <span>6</span></div>
+          <div class="api-row" data-ep="reviews"><div class="ms"><span class="m get">GET</span><span class="m">POST</span></div><div class="p">/api/reviews</div></div>
+          <div class="api-row"><div class="ms"><span class="m get">GET</span><span class="m">POST</span></div><div class="p">/api/favorites</div></div>
+          <div class="api-row"><div class="ms"><span class="m get">GET</span><span class="m">POST</span></div><div class="p">/api/coupons</div></div>
+          <div class="api-row" data-ep="claim"><div class="ms"><span class="m">POST</span></div><div class="p">/api/coupons/<em>[id]</em>/claim</div></div>
+          <div class="api-row"><div class="ms"><span class="m get">GET</span></div><div class="p">/api/users/coupons</div></div>
+          <div class="api-row"><div class="ms"><span class="m get">GET</span><span class="m">POST</span></div><div class="p">/api/comments</div></div>
+        </div>
+        <div class="api-group">
+          <div class="agh">AI · 地图 · 平台 <span>7</span></div>
+          <div class="api-row" data-ep="ai"><div class="ms"><span class="m">POST</span></div><div class="p">/api/ai/recommend <em>· SSE 流式</em></div></div>
+          <div class="api-row"><div class="ms"><span class="m get">GET</span></div><div class="p">/api/map/geocoder <em>· 腾讯</em></div></div>
+          <div class="api-row"><div class="ms"><span class="m get">GET</span></div><div class="p">/api/map/geocoder/reverse</div></div>
+          <div class="api-row" data-ep="upload"><div class="ms"><span class="m">POST</span></div><div class="p">/api/upload <em>· 文件名安全化</em></div></div>
+          <div class="api-row"><div class="ms"><span class="m get">GET</span><span class="m">POST</span></div><div class="p">/api/locations</div></div>
+          <div class="api-row"><div class="ms"><span class="m get">GET</span><span class="m">POST</span></div><div class="p">/api/tags</div></div>
+          <div class="api-row"><div class="ms"><span class="m get">GET</span></div><div class="p">/api/swagger <em>· OpenAPI</em></div></div>
+        </div>
+      </div>
+
+      <div class="api-hint mono reveal">点击高亮的端点 → 查看真实请求/响应（取自路由 <span class="mono">@swagger</span> 注释）</div>
+      <div class="api-detail reveal" id="apiDetail" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- ========== 工程实现细节 ========== -->
+  <section id="internals" class="alt">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">实现细节</div>
+        <h2 class="sec-title">八段真实工程实现</h2>
+        <p class="sec-lead">从鉴权刷新、限流、缓存到事务、错误处理与查询优化，均取自源码，非示意。</p>
+      </div>
+
+      <!-- 1. failedQueue -->
+      <div class="int-block flow-split reveal">
+        <div>
+          <div class="ih">① 无感刷新 · failedQueue</div>
+          <div class="isub">Access Token 过期时，<code>isRefreshing</code> 锁保证只发一次刷新请求，并发的 401 请求进入 <code>failedQueue</code> 排队；刷新成功后 <code>processQueue</code> 用新 token 逐一重放，排除 login/refresh 自身以防死循环。</div>
+        </div>
+        <div class="code" aria-label="failedQueue 代码">
+          <div class="chd"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="fp">app/lib/request.ts</span></div>
+<pre><code><span class="tok-k">if</span> (isRefreshing) {
+  <span class="tok-c">// 刷新进行中：排队，拿到新 token 再重发</span>
+  <span class="tok-k">return new</span> <span class="tok-t">Promise</span>((resolve, reject) => {
+    failedQueue.<span class="tok-fn">push</span>({ resolve, reject });
+  }).<span class="tok-fn">then</span>((token) => {
+    originalRequest.headers[<span class="tok-s">'Authorization'</span>] = <span class="tok-s">'Bearer '</span> + token;
+    <span class="tok-k">return</span> <span class="tok-fn">request</span>(originalRequest);
+  });
+}
+isRefreshing = <span class="tok-n">true</span>;</code></pre>
+        </div>
+      </div>
+
+      <!-- 2. Redis 权限缓存 -->
+      <div class="int-block flow-split reveal">
+        <div>
+          <div class="ih">② 权限缓存 · Redis</div>
+          <div class="isub"><code>checkPermission</code> 先查 <code>perm:{userId}</code>（TTL <code>900s</code> = 15 分钟），未命中才走 <code>role → rolePermission → permission.name</code> 的窄字段查询并回填；空权限集也缓存，避免高频用户反复击穿数据库。</div>
+        </div>
+        <div class="code" aria-label="权限缓存代码">
+          <div class="chd"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="fp">app/api/utils/permissions.ts</span></div>
+<pre><code><span class="tok-k">const</span> PERM_TTL = <span class="tok-n">900</span>; <span class="tok-c">// 15 分钟</span>
+
+<span class="tok-k">const</span> cached = <span class="tok-k">await</span> redis.<span class="tok-fn">smembers</span>(<span class="tok-s">`perm:${userId}`</span>);
+<span class="tok-k">if</span> (cached.length) <span class="tok-k">return new</span> <span class="tok-t">Set</span>(cached);
+
+<span class="tok-c">// 未命中 → 窄查询后回填（空集也缓存防击穿）</span>
+<span class="tok-k">await</span> redis.<span class="tok-fn">sadd</span>(<span class="tok-s">`perm:${userId}`</span>, ...perms);
+<span class="tok-k">await</span> redis.<span class="tok-fn">expire</span>(<span class="tok-s">`perm:${userId}`</span>, PERM_TTL);</code></pre>
+        </div>
+      </div>
+
+      <!-- 3. 审计日志事务 -->
+      <div class="int-block flow-split reveal">
+        <div>
+          <div class="ih">③ 审计日志 · 原子事务</div>
+          <div class="isub">酒店状态变更与留痕写在同一 <code>$transaction</code> 内：<code>tx.hotel.update</code> 改状态、<code>tx.hotelAuditLog.create</code> 记录 <code>operatorId / oldStatus / newStatus / comment</code>，二者要么全成功要么全回滚，审计不漏不重。</div>
+        </div>
+        <div class="code" aria-label="审计事务代码">
+          <div class="chd"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="fp">app/api/hotels/[id]/route.tsx</span></div>
+<pre><code><span class="tok-k">await</span> prisma.<span class="tok-fn">$transaction</span>(<span class="tok-k">async</span> (tx) => {
+  <span class="tok-k">const</span> hotel = <span class="tok-k">await</span> tx.hotel.<span class="tok-fn">update</span>({ where: { id }, data: updateData });
+
+  <span class="tok-k">if</span> (isStatusChange) {
+    <span class="tok-k">await</span> tx.hotelAuditLog.<span class="tok-fn">create</span>({ data: {
+      hotelId: id, operatorId: userId,
+      oldStatus: existingHotel.status, newStatus,
+      comment: body.rejectionReason || <span class="tok-s">'State update'</span>,
+    }});
+  }
+  <span class="tok-k">return</span> hotel;
+});</code></pre>
+        </div>
+      </div>
+
+      <!-- 4. N+1 优化 -->
+      <div class="int-block flow-split reveal">
+        <div>
+          <div class="ih">④ 列表查询 · 消除 N+1</div>
+          <div class="isub">酒店列表把 <code>count</code> 与 <code>findMany</code> 合进一次 <code>$transaction([...])</code>；<code>findMany</code> 用嵌套 <code>select</code> 一次性拉齐 location / merchant / tags / roomTypes，避免逐条回查。价格筛选走 <code>roomTypes.some</code>，标签走 <code>AND</code>，默认只出 <code>published</code>。</div>
+        </div>
+        <div class="code" aria-label="列表查询代码">
+          <div class="chd"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="fp">app/api/hotels/route.tsx</span></div>
+<pre><code><span class="tok-k">const</span> [total, hotels] = <span class="tok-k">await</span> prisma.<span class="tok-fn">$transaction</span>([
+  prisma.hotel.<span class="tok-fn">count</span>({ where }),
+  prisma.hotel.<span class="tok-fn">findMany</span>({
+    where,
+    include: {
+      location: { select: { id: <span class="tok-n">true</span>, name: <span class="tok-n">true</span> } },
+      roomTypes: { select: { price: <span class="tok-n">true</span>, stock: <span class="tok-n">true</span> } },
+    },
+    orderBy: { createdAt: <span class="tok-s">'desc'</span> }, skip, take: limit,
+  }),
+]);</code></pre>
+        </div>
+      </div>
+
+      <!-- 5. Redis 限流 -->
+      <div class="int-block flow-split reveal">
+        <div>
+          <div class="ih">⑤ 接口限流 · Redis 固定窗口</div>
+          <div class="isub"><code>checkRateLimit</code> 用 <code>redis.incr</code> 计数，首次访问设 <code>expire</code>；超限用剩余 <code>ttl</code> 算 <code>retryAfterSec</code>。AI 推荐限 <code>10 次 / 小时 / 用户</code>，超限返回 <code>429</code>。Redis 故障时降级放行，不误伤正常请求。</div>
+        </div>
+        <div class="code" aria-label="限流代码">
+          <div class="chd"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="fp">app/lib/rate-limit.ts</span></div>
+<pre><code><span class="tok-k">const</span> count = <span class="tok-k">await</span> redis.<span class="tok-fn">incr</span>(<span class="tok-s">`ratelimit:${key}`</span>);
+<span class="tok-k">if</span> (count === <span class="tok-n">1</span>) <span class="tok-k">await</span> redis.<span class="tok-fn">expire</span>(redisKey, windowSec);
+
+<span class="tok-k">if</span> (count > limit) {
+  <span class="tok-k">const</span> ttl = <span class="tok-k">await</span> redis.<span class="tok-fn">ttl</span>(redisKey);
+  <span class="tok-k">return</span> { allowed: <span class="tok-n">false</span>, retryAfterSec: ttl };
+}
+<span class="tok-k">return</span> { allowed: <span class="tok-n">true</span>, retryAfterSec: <span class="tok-n">0</span> };</code></pre>
+        </div>
+      </div>
+
+      <!-- 6. 统一错误处理 -->
+      <div class="int-block flow-split reveal">
+        <div>
+          <div class="ih">⑥ 统一错误处理 · Prisma / Zod 映射</div>
+          <div class="isub">Prisma 错误码映射为用户友好文案（<code>P2002</code> 唯一冲突、<code>P2003</code> 外键、<code>P2025</code> 未找到），<code>ZodError</code> 转校验提示，配合业务错误码表，统一 <code>{ error, status, details }</code> 响应格式。</div>
+        </div>
+        <div class="code" aria-label="错误处理代码">
+          <div class="chd"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="fp">app/lib/error-handler.ts</span></div>
+<pre><code><span class="tok-k">const</span> PRISMA_ERROR_MESSAGES = {
+  P2002: <span class="tok-s">'该记录已存在，请检查唯一字段'</span>,
+  P2003: <span class="tok-s">'关联的记录不存在'</span>,
+  P2025: <span class="tok-s">'记录未找到'</span>,
+};
+
+<span class="tok-k">if</span> (error <span class="tok-k">instanceof</span> <span class="tok-t">ZodError</span>)
+  <span class="tok-k">return</span> { error: <span class="tok-s">'数据验证失败'</span>, status: <span class="tok-n">400</span>, details: error.issues };</code></pre>
+        </div>
+      </div>
+
+      <!-- 7. 评价三重校验 -->
+      <div class="int-block flow-split reveal">
+        <div>
+          <div class="ih">⑦ 评价三重校验 · 一单一评</div>
+          <div class="isub">提交评价前三道关：<code>findFirst({ id, userId })</code> 校验订单归属；状态须为 <code>completed / checked_out</code>；再查 <code>review.findUnique({ bookingId })</code>——<code>bookingId</code> 唯一约束保证一单只能评一次。</div>
+        </div>
+        <div class="code" aria-label="评价校验代码">
+          <div class="chd"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="fp">app/api/reviews/route.tsx</span></div>
+<pre><code><span class="tok-c">// ① 归属</span>
+<span class="tok-k">const</span> booking = <span class="tok-k">await</span> prisma.booking.<span class="tok-fn">findFirst</span>({
+  where: { id: bookingId, userId: auth.user.userId } });
+
+<span class="tok-c">// ② 状态</span>
+<span class="tok-k">if</span> (![<span class="tok-s">'completed'</span>, <span class="tok-s">'checked_out'</span>].<span class="tok-fn">includes</span>(booking.status)) ...
+
+<span class="tok-c">// ③ 一单一评</span>
+<span class="tok-k">const</span> existing = <span class="tok-k">await</span> prisma.review.<span class="tok-fn">findUnique</span>({ where: { bookingId } });</code></pre>
+        </div>
+      </div>
+
+      <!-- 8. 动态定价 upsert -->
+      <div class="int-block flow-split reveal">
+        <div>
+          <div class="ih">⑧ 动态定价 · 批量幂等 upsert</div>
+          <div class="isub">商户在日历上批量设价 / 配额 / 关房：一次 <code>$transaction</code> 内对每条按 <code>(roomTypeId, date)</code> 复合唯一键 <code>upsert</code>，幂等可重放；新建记录用 <code>price ?? roomType.price</code>、<code>quota ?? roomType.stock</code> 兜底。</div>
+        </div>
+        <div class="code" aria-label="动态定价代码">
+          <div class="chd"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="fp">app/api/room-types/[id]/availability/route.tsx</span></div>
+<pre><code><span class="tok-k">await</span> prisma.<span class="tok-fn">$transaction</span>(
+  data.<span class="tok-fn">map</span>((item) => prisma.roomAvailability.<span class="tok-fn">upsert</span>({
+    where: { roomTypeId_date: { roomTypeId, date } },
+    update: { price: item.price, quota: item.quota, isClosed: item.isClosed },
+    create: {
+      roomTypeId, date,
+      price: item.price ?? roomType.price,
+      quota: item.quota ?? roomType.stock, booked: <span class="tok-n">0</span>,
+    },
+  }))
+);</code></pre>
+        </div>
+      </div>
+
+      <!-- 可靠性小结 -->
+      <div class="int-note reveal">
+        <div class="nh">可靠性 · Redis 故障不阻断主流程</div>
+        <p>Redis 承担限流、Token 黑名单与权限缓存，但均以「<b>失败降级</b>」接入——外部依赖抖动时业务照常，不因缓存层拖垮主链路：</p>
+        <ul>
+          <li><b>限流</b> 异常时 <code>allowed: true</code> 放行</li>
+          <li><b>黑名单</b> 查询异常时 <code>return false</code> 放行；写入用 <code>EX = 剩余有效期</code> 到期自清理</li>
+          <li><b>权限缓存</b> 读写失败即跳过缓存、回落数据库查询</li>
+          <li><b>连接</b> ioredis <code>lazyConnect</code> + <code>maxRetriesPerRequest: 3</code>，globalThis 单例复用</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 安全设计 ========== -->
+  <section id="security">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">安全设计</div>
+        <h2 class="sec-title">纵深防御，逐层收口</h2>
+        <p class="sec-lead">从密码存储到接口鉴权、限流与注入防护，安全措施贯穿每一层，均可在代码中验证。</p>
+      </div>
+      <div class="grid g3 reveal">
+        <div class="card"><h3 style="font-size:16px">密码与令牌</h3><p>密码 <code>bcryptjs</code> 哈希（salt rounds=10），明文不落库；JWT 双 Token（Access 1h / Refresh 7d）。</p></div>
+        <div class="card"><h3 style="font-size:16px">登出即失效</h3><p>登出把 Token 写入 Redis 黑名单，<code>EX</code> = 剩余有效期到期自清；<code>verifyAuth</code> 每次校验黑名单。</p></div>
+        <div class="card"><h3 style="font-size:16px">接口限流</h3><p>登录与 AI 推荐均接 Redis 固定窗口限流（AI <code>10次/小时</code>），防暴力破解与滥用，超限 <code>429</code>。</p></div>
+        <div class="card"><h3 style="font-size:16px">RBAC 双层</h3><p>四角色 + 细粒度 Permission；审核/删除额外校验 <code>HOTEL_AUDIT</code> / <code>HOTEL_DELETE</code>，权限走 Redis 缓存。</p></div>
+        <div class="card"><h3 style="font-size:16px">输入校验</h3><p><code>Zod</code> 运行时 Schema 校验请求体，与 LangChain 结构化输出复用同一套定义，非法入参早失败。</p></div>
+        <div class="card"><h3 style="font-size:16px">注入与上传</h3><p>Prisma 参数化查询免疫 SQL 注入；上传文件名正则净化防路径穿越；<code>JWT_SECRET</code> 启动即校验强制配置。</p></div>
+      </div>
+
+      <div class="demo2 reveal">
+        <!-- JWT 解码器 -->
+        <div class="d2-card">
+          <div class="d2-h">JWT 解码器 · 双 Token</div>
+          <div class="jwt-token" id="jwtToken">
+            <span class="jp1">eyJhbGciOiJIUzI1NiJ9</span><span class="jdot">.</span><span class="jp2">eyJ1c2VySWQiOjEyLCJyb2xlIjoibWVyY2hhbnQi...</span><span class="jdot">.</span><span class="jp3">4pX9c_Kk3rQ7f2v...</span>
+          </div>
+          <div class="jwt-legend"><span class="l1">Header</span><span class="l2">Payload</span><span class="l3">Signature</span></div>
+          <div class="jwt-payload" id="jwtPayload"></div>
+          <div class="d2-note">Access Token 1h · Refresh Token 7d · 登出写入 Redis 黑名单即时失效</div>
+        </div>
+        <!-- 限流可视化 -->
+        <div class="d2-card">
+          <div class="d2-h">Redis 固定窗口限流 · AI 10/小时</div>
+          <div class="rl-row">
+            <button class="rl-btn" id="rlBtn" type="button">发起请求</button>
+            <div class="rl-count"><span id="rlN">0</span> / 10</div>
+            <button class="rl-reset" id="rlReset" type="button">重置</button>
+          </div>
+          <div class="rl-bar"><i id="rlFill"></i></div>
+          <div class="rl-log" id="rlLog" aria-live="polite"></div>
+          <div class="d2-note"><span class="mono">redis.incr(ratelimit:key)</span> · 首次 <span class="mono">expire</span> · 超限按 <span class="mono">ttl</span> 返回 retryAfterSec</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 小程序端 ========== -->
+  <section id="mobile" class="alt">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">小程序端</div>
+        <h2 class="sec-title">一套 React，编译多端</h2>
+        <p class="sec-lead">Taro 4 把同一套 React 代码编译到微信/支付宝/抖音/QQ/H5，前端体验细节同样打磨到位。</p>
+      </div>
+      <div class="grid g3 reveal">
+        <div class="card"><h3 style="font-size:16px">多端编译</h3><p>Taro 4.1 一套代码编译 <code>微信 / 支付宝 / 抖音 / QQ / H5</code> 8+ 平台，降低多端维护成本。</p></div>
+        <div class="card"><h3 style="font-size:16px">无限滚动</h3><p>服务端分页（10 条/页）+ <code>onScrollToLower</code> 追加，<code>loadingMore</code> 互斥锁 + <code>hasMore</code> 状态防抖。</p></div>
+        <div class="card"><h3 style="font-size:16px">自定义日历</h3><p>手写日历组件：无限滚动、农历显示、房型价格联动、选中震动反馈，区间/单日双模式。</p></div>
+        <div class="card"><h3 style="font-size:16px">深色模式</h3><p><code>Taro.eventCenter</code> 广播主题变更，全局注入 CSS 变量，全页面无闪烁切换。</p></div>
+        <div class="card"><h3 style="font-size:16px">骨架屏</h3><p>Skeleton 覆盖 hotelCard / hotelDetail / orderCard，首屏加载不留白，感知性能更优。</p></div>
+        <div class="card"><h3 style="font-size:16px">本地存储</h3><p><code>storageSync</code> 封装本地存储，搜索历史去重、主题与登录态持久化。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 部署工程化 ========== -->
+  <section id="deploy">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">部署工程化</div>
+        <h2 class="sec-title">从 Schema 到上线</h2>
+        <p class="sec-lead">声明式数据库、自动文档与统一规范，让交付可复现、可维护。</p>
+      </div>
+      <div class="grid g3 reveal">
+        <div class="card"><h3 style="font-size:16px">Web 部署</h3><p>Next.js 部署 Vercel，前端 SSR 与 API Routes 合并，Serverless 无需独立后端。</p></div>
+        <div class="card"><h3 style="font-size:16px">小程序部署</h3><p>Taro <code>build:weapp</code> 产物导入微信开发者工具预览/上传，多端命令一键切换。</p></div>
+        <div class="card"><h3 style="font-size:16px">数据库工程化</h3><p>Prisma schema 驱动：<code>db push</code> / <code>migrate</code> 同步结构，<code>seed</code> 灌入角色权限/城市/酒店样本。</p></div>
+        <div class="card"><h3 style="font-size:16px">API 文档</h3><p>JSDoc 注释经 <code>next-swagger-doc</code> 自动生成 OpenAPI，Swagger UI 挂 <code>/api-doc</code>。</p></div>
+        <div class="card"><h3 style="font-size:16px">代码规范</h3><p>ESLint 统一风格，TypeScript 全链路类型；前后端共享 <code>types/index.ts</code> 与 <code>constants</code>。</p></div>
+        <div class="card"><h3 style="font-size:16px">环境配置</h3><p><code>.env</code> 管理 <code>JWT_SECRET / REDIS_URL / DATABASE_URL / OPENAI_*</code>，模型供应商可切换。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 创新点 ========== -->
+  <section id="inno">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">创新点</div>
+        <h2 class="sec-title">七项工程决策</h2>
+        <p class="sec-lead">每一项都落到具体代码，可在仓库中逐一验证。</p>
+      </div>
+
+      <div class="grid inno reveal">
+        <div class="inno-card">
+          <div class="no">01 · 并发安全</div>
+          <h3>事务性防超卖</h3>
+          <p><code>$transaction</code> 内对每个入住日逐日 upsert 库存，<code>booked &gt;= quota</code> 即整体回滚，由 InnoDB 行锁保护原子递增，从存储层杜绝超卖。</p>
+        </div>
+        <div class="inno-card">
+          <div class="no">02 · AI</div>
+          <h3>LLM 两阶段推荐</h3>
+          <p>意图提取 <code>temperature=0</code> 走结构化输出，文案生成 <code>temperature=0.7</code>，结合实时库存以 SSE 流式推荐。</p>
+        </div>
+        <div class="inno-card">
+          <div class="no">03 · 安全</div>
+          <h3>RBAC 双层鉴权</h3>
+          <p>四角色（USER / STAFF / MERCHANT / ADMIN）+ 细粒度 Permission；JWT 双 Token（1h / 7d），登出经 Redis 黑名单失效，状态变更原子写审计日志。</p>
+        </div>
+        <div class="inno-card">
+          <div class="no">04 · 架构</div>
+          <h3>多端统一</h3>
+          <p>Web 后台与小程序复用同一套 Next.js API Routes；Taro 一套 React 代码编译微信 / 支付宝 / 抖音 / H5 等 8+ 平台。</p>
+        </div>
+        <div class="inno-card">
+          <div class="no">05 · 类型</div>
+          <h3>全栈类型安全</h3>
+          <p>Prisma 生成数据库类型，前后端共享 <code>types/index.ts</code>；LangChain 结构化输出与 Zod 校验复用同一套 Schema。</p>
+        </div>
+        <div class="inno-card">
+          <div class="no">06 · 性能</div>
+          <h3>长列表渲染优化</h3>
+          <p>服务端分页（10 条 / 页）+ 客户端无限滚动追加，<code>loadingMore</code> 互斥锁 + <code>hasMore</code> 状态，首屏渲染线性可控。</p>
+        </div>
+        <div class="inno-card">
+          <div class="no">07 · 工程化</div>
+          <h3>规范与自动化</h3>
+          <p>JSDoc 注释经 next-swagger-doc 自动生成 OpenAPI 文档；文件上传名安全化；Prisma 单例防热更新连接泄漏。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 权限矩阵 ========== -->
+  <section id="rbac" class="alt">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">权限矩阵</div>
+        <h2 class="sec-title">四角色 · 基于角色的访问控制</h2>
+        <p class="sec-lead">角色在 JWT Payload 中携带，API 层由 verifyAuth() 解码后按需二次查询 Permission 表。</p>
+      </div>
+
+      <div class="permsim reveal" role="group" aria-label="权限模拟器">
+        <span class="ps-label">// 选一个角色，实时高亮它能访问的功能</span>
+        <span class="ps-btns">
+          <button class="ps-btn on" type="button" data-col="1">USER</button>
+          <button class="ps-btn" type="button" data-col="2">STAFF</button>
+          <button class="ps-btn" type="button" data-col="3">MERCHANT</button>
+          <button class="ps-btn" type="button" data-col="4">ADMIN</button>
+        </span>
+        <span class="ps-sum" id="psSum"></span>
+      </div>
+
+      <div class="tbl-wrap reveal">
+        <table class="matrix" id="rbacTable">
+          <thead>
+            <tr>
+              <th>功能</th>
+              <th class="c">USER</th>
+              <th class="c">STAFF</th>
+              <th class="c">MERCHANT</th>
+              <th class="c">ADMIN</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>酒店搜索与浏览</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+            <tr><td>在线预订 / 评价 / 收藏</td><td class="c yes">✓</td><td class="c no">—</td><td class="c no">—</td><td class="c no">—</td></tr>
+            <tr><td>酒店与房型 CRUD</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c pt">全部</td></tr>
+            <tr><td>动态定价 / 数据看板</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c no">—</td></tr>
+            <tr><td>职员 / 优惠券管理</td><td class="c no">—</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+            <tr><td>酒店审核（通过 / 拒绝）</td><td class="c no">—</td><td class="c no">—</td><td class="c no">—</td><td class="c pt">HOTEL_AUDIT</td></tr>
+            <tr><td>城市 / 标签 · 审计日志</td><td class="c no">—</td><td class="c no">—</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+            <tr><td>删除任意酒店</td><td class="c no">—</td><td class="c no">—</td><td class="c no">—</td><td class="c pt">HOTEL_DELETE</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 团队 ========== -->
+  <section id="team">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">团队</div>
+        <h2 class="sec-title">三人协作</h2>
+      </div>
+      <div class="grid team reveal">
+        <div class="member">
+          <div class="av">R</div>
+          <div class="nm">Raven · 汪嘉桥</div>
+          <div class="ct">101+ commits · 中国地质大学(武汉)</div>
+          <ul>
+            <li>项目架构与基础设施、Prisma Schema 与种子数据</li>
+            <li>PC 全栈页面、小程序核心功能与日历组件</li>
+            <li>深色模式全局适配、Skeleton、安全与质量、答辩文档</li>
+          </ul>
+        </div>
+        <div class="member">
+          <div class="av">C</div>
+          <div class="nm">Chuhan Gao · 高出寒</div>
+          <div class="ct">61 commits · 武汉大学</div>
+          <ul>
+            <li>后端 API：酒店 / 预订 / 鉴权 / 标签位置、Swagger 文档</li>
+            <li>AI 推荐（LangChain + OpenAI 流式）、评价系统</li>
+            <li>优惠券与积分、腾讯地图、列表分页与城市搜索</li>
+          </ul>
+        </div>
+        <div class="member">
+          <div class="av">C</div>
+          <div class="nm">Chiaki · 曹昱晨</div>
+          <div class="ct">11 commits · 中国矿业大学</div>
+          <ul>
+            <li>小程序端 AI 聊天组件、详情页与评论区美化</li>
+            <li>移动端优惠券页、日历交互与列表渲染优化</li>
+            <li>QQ / 支付宝小程序初步适配、部分页面国际化</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== Footer ========== -->
+  <footer>
+    <div class="foot">
+      <div class="fb">易宿 <b>YiSu</b>
+        <span>全栈酒店管理平台 · 技术说明 v1.0</span>
+      </div>
+      <div class="fmeta">
+        <div class="r"><span class="k">作者</span>汪嘉桥 · 高出寒 · 曹昱晨</div>
+        <div class="r"><span class="k">技术栈</span>Next.js 16 · Prisma 6 · MySQL 8 · Taro 4 · LangChain</div>
+        <div class="r"><span class="k">数据源</span>本页数字均取自仓库代码实测</div>
+      </div>
+    </div>
+  </footer>
+
+  </main>
+
+  <script src="assets/main.js"></script>
+</body>
+</html>
